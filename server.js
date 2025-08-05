@@ -13,6 +13,11 @@ app.use(express.json());
 // Serve static files from the React app build
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// Test endpoint for health check
+app.get('/api/test', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
+
 // Handle React routing, return all requests to React app
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) {
