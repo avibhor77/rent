@@ -186,6 +186,121 @@ app.post('/api/mark-payment-paid', async (req, res) => {
     }
 });
 
+app.post('/api/adjust-rent', async (req, res) => {
+    try {
+        const { tenant, month, amount, type } = req.body;
+        
+        // Find and update the rent data
+        const rentRow = rentData.find(row => row.Month === month && row.Tenant === tenant);
+        if (rentRow) {
+            if (type === 'future') {
+                // Add future payment
+                rentRow.TotalRent = amount;
+                rentRow.Status = 'Paid';
+            } else {
+                // Adjust existing payment
+                rentRow.TotalRent = amount;
+            }
+            res.json({ success: true, message: `Rent adjusted for ${tenant} in ${month}` });
+        } else {
+            res.status(404).json({ success: false, message: 'Rent record not found' });
+        }
+    } catch (error) {
+        console.error('Error adjusting rent:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.post('/api/update-tenant-config', async (req, res) => {
+    try {
+        const { tenant, updates } = req.body;
+        
+        // Find and update tenant config
+        const configIndex = tenantConfigs.findIndex(config => config.tenantKey === tenant);
+        if (configIndex !== -1) {
+            Object.assign(tenantConfigs[configIndex], updates);
+            res.json({ success: true, message: `Tenant config updated for ${tenant}` });
+        } else {
+            res.status(404).json({ success: false, message: 'Tenant config not found' });
+        }
+    } catch (error) {
+        console.error('Error updating tenant config:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.get('/api/next-month', async (req, res) => {
+    try {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = 'August 25';
+        const [month, year] = currentMonth.split(' ');
+        const currentMonthIndex = months.indexOf(month);
+        const currentYear = parseInt('20' + year);
+        
+        let nextMonthIndex = currentMonthIndex + 1;
+        let nextYear = currentYear;
+        
+        if (nextMonthIndex >= 12) {
+            nextMonthIndex = 0;
+            nextYear++;
+        }
+        
+        const nextMonth = `${months[nextMonthIndex]} ${nextYear.toString().slice(-2)}`;
+        res.json({ success: true, data: nextMonth });
+    } catch (error) {
+        console.error('Error getting next month:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.get('/api/month-exists/:month', async (req, res) => {
+    try {
+        const { month } = req.params;
+        const exists = meterData.some(row => row.month === month);
+        res.json({ success: true, exists });
+    } catch (error) {
+        console.error('Error checking month exists:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.post('/api/update-meter-readings', async (req, res) => {
+    try {
+        const { month, readings } = req.body;
+        
+        // Find and update meter data
+        const meterIndex = meterData.findIndex(row => row.month === month);
+        if (meterIndex !== -1) {
+            Object.assign(meterData[meterIndex], readings);
+            res.json({ success: true, message: `Meter readings updated for ${month}` });
+        } else {
+            res.status(404).json({ success: false, message: 'Meter data not found' });
+        }
+    } catch (error) {
+        console.error('Error updating meter readings:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+app.post('/api/update-a206-meter', async (req, res) => {
+    try {
+        const { month, readings } = req.body;
+        
+        // Find and update A-206 meter data
+        const meterIndex = meterData.findIndex(row => row.month === month);
+        if (meterIndex !== -1) {
+            Object.assign(meterData[meterIndex], readings);
+            res.json({ success: true, message: `A-206 meter readings updated for ${month}` });
+        } else {
+            res.status(404).json({ success: false, message: 'A-206 meter data not found' });
+        }
+    } catch (error) {
+        console.error('Error updating A-206 meter readings:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
 app.get('/api/payment-report', async (req, res) => {
     try {
         const { period = 'ytd' } = req.query;
