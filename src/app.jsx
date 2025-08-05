@@ -61,6 +61,11 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Helper function to get API URL for deployment
+  const getApiUrl = () => {
+    return import.meta.env.VITE_API_URL || '';
+  };
 
   // Helper functions defined at the top level
   const generateFutureMonths = (currentMonth, count = 12) => {
@@ -178,11 +183,12 @@ function App() {
   const loadData = async () => {
     try {
       setLoading(true);
+      const apiUrl = getApiUrl();
   
       const [dashboardRes, rentRes, meterRes] = await Promise.all([
-        fetch(`/api/dashboard-data?month=${selectedMonth}`),
-        fetch('/api/rent-data'),
-        fetch('/api/meter-data')
+        fetch(`${apiUrl}/api/dashboard-data?month=${selectedMonth}`),
+        fetch(`${apiUrl}/api/rent-data`),
+        fetch(`${apiUrl}/api/meter-data`)
       ]);
 
       const dashboardData = await dashboardRes.json();
@@ -2174,7 +2180,8 @@ function App() {
     const loadPaymentReport = async (period) => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/payment-report?period=${period}`);
+        const apiUrl = getApiUrl();
+        const response = await fetch(`${apiUrl}/api/payment-report?period=${period}`);
         const result = await response.json();
         if (result.success) {
           setReportData(result.data);
