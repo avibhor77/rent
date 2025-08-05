@@ -179,35 +179,21 @@ function App() {
     try {
       setLoading(true);
   
-      // Try to load from backend first
-      try {
-        const [dashboardRes, rentRes, meterRes] = await Promise.all([
-          fetch(`/api/dashboard-data?month=${selectedMonth}`),
-          fetch('/api/rent-data'),
-          fetch('/api/meter-data')
-        ]);
+      const [dashboardRes, rentRes, meterRes] = await Promise.all([
+        fetch(`/api/dashboard-data?month=${selectedMonth}`),
+        fetch('/api/rent-data'),
+        fetch('/api/meter-data')
+      ]);
 
-        const dashboardData = await dashboardRes.json();
-        const rentData = await rentRes.json();
-        const meterData = await meterRes.json();
+      const dashboardData = await dashboardRes.json();
+      const rentData = await rentRes.json();
+      const meterData = await meterRes.json();
 
-        if (dashboardData.success) {
-          setDashboardData(dashboardData.data);
-        }
-        if (rentData.success) setRentData(rentData.data);
-        if (meterData.success) setMeterData(meterData.data);
-        return; // Success, exit early
-      } catch (backendError) {
-        console.log('Backend not available, using demo data');
+      if (dashboardData.success) {
+        setDashboardData(dashboardData.data);
       }
-
-      // Fallback to demo data
-      const { demoData } = await import('./demo-data.js');
-      
-      setDashboardData(demoData.dashboardData[selectedMonth] || {});
-      setRentData(demoData.rentData);
-      setMeterData(demoData.meterData);
-      
+      if (rentData.success) setRentData(rentData.data);
+      if (meterData.success) setMeterData(meterData.data);
     } catch (error) {
       console.error('Error loading data:', error);
       setMessage('Error loading data: ' + error.message);
@@ -427,23 +413,13 @@ function App() {
   // Load tenant configurations from API
   const loadTenantConfigs = async () => {
     try {
-      // Try backend first
-      try {
-        const response = await fetch('/api/tenant-configs');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            setTenantConfigs(result.data);
-            return; // Success, exit early
-          }
+      const response = await fetch('/api/tenant-configs');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setTenantConfigs(result.data);
         }
-      } catch (backendError) {
-        console.log('Backend not available, using demo tenant configs');
       }
-
-      // Fallback to demo data
-      const { demoData } = await import('./demo-data.js');
-      setTenantConfigs(demoData.tenantConfigs);
     } catch (error) {
       console.error('Error loading tenant configs:', error);
       // Fallback to defaults if API fails
@@ -488,17 +464,7 @@ function App() {
       );
     }
 
-    // Check if data has the expected structure, if not, return a simple message
-    if (!data[0] || typeof data[0].expected === 'undefined') {
-      return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>{title}</Typography>
-          <Typography variant="body2" color="text.secondary">Chart data not available in demo mode</Typography>
-        </Box>
-      );
-    }
-
-    const maxAmount = Math.max(...data.map(d => d.expected || 0));
+    const maxAmount = Math.max(...data.map(d => d.expected));
     const barHeight = 300;
 
     return (
@@ -662,7 +628,7 @@ function App() {
         {/* Chart and Pending Dues */}
         <Grid item xs={12} lg={8}>
           <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
-            <ProfessionalStackedBarChart data={[]} title="Monthly Collection Trend" />
+            <ProfessionalStackedBarChart data={dashboardData.monthlyData || []} title="Monthly Collection Trend" />
           </Card>
         </Grid>
 
@@ -2208,23 +2174,14 @@ function App() {
     const loadPaymentReport = async (period) => {
       setLoading(true);
       try {
-        // Try backend first
-        try {
-          const apiUrl = process.env.REACT_APP_API_URL || '';
-          const response = await fetch(`${apiUrl}/api/payment-report?period=${period}`);
-          const result = await response.json();
-          if (result.success) {
-            setReportData(result.data);
-            return; // Success, exit early
-          }
-        } catch (backendError) {
-          console.log('Backend not available, using demo payment report');
+        const apiUrl = process.env.REACT_APP_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/payment-report?period=${period}`);
+        const result = await response.json();
+        if (result.success) {
+          setReportData(result.data);
+        } else {
+          console.error('Failed to load payment report:', result.error);
         }
-
-        // Fallback to demo data
-        const { mockAPI } = await import('./demo-data.js');
-        const demoReport = await mockAPI.getPaymentReport(period);
-        setReportData(demoReport);
       } catch (error) {
         console.error('Error loading payment report:', error);
       } finally {
