@@ -179,21 +179,35 @@ function App() {
     try {
       setLoading(true);
   
-      const [dashboardRes, rentRes, meterRes] = await Promise.all([
-        fetch(`/api/dashboard-data?month=${selectedMonth}`),
-        fetch('/api/rent-data'),
-        fetch('/api/meter-data')
-      ]);
+      // Try to load from backend first
+      try {
+        const [dashboardRes, rentRes, meterRes] = await Promise.all([
+          fetch(`/api/dashboard-data?month=${selectedMonth}`),
+          fetch('/api/rent-data'),
+          fetch('/api/meter-data')
+        ]);
 
-      const dashboardData = await dashboardRes.json();
-      const rentData = await rentRes.json();
-      const meterData = await meterRes.json();
+        const dashboardData = await dashboardRes.json();
+        const rentData = await rentRes.json();
+        const meterData = await meterRes.json();
 
-      if (dashboardData.success) {
-        setDashboardData(dashboardData.data);
+        if (dashboardData.success) {
+          setDashboardData(dashboardData.data);
+        }
+        if (rentData.success) setRentData(rentData.data);
+        if (meterData.success) setMeterData(meterData.data);
+        return; // Success, exit early
+      } catch (backendError) {
+        console.log('Backend not available, using demo data');
       }
-      if (rentData.success) setRentData(rentData.data);
-      if (meterData.success) setMeterData(meterData.data);
+
+      // Fallback to demo data
+      const { demoData } = await import('./demo-data.js');
+      
+      setDashboardData(demoData.dashboardData[selectedMonth] || {});
+      setRentData(demoData.rentData);
+      setMeterData(demoData.meterData);
+      
     } catch (error) {
       console.error('Error loading data:', error);
       setMessage('Error loading data: ' + error.message);
@@ -413,13 +427,23 @@ function App() {
   // Load tenant configurations from API
   const loadTenantConfigs = async () => {
     try {
-      const response = await fetch('/api/tenant-configs');
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setTenantConfigs(result.data);
+      // Try backend first
+      try {
+        const response = await fetch('/api/tenant-configs');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setTenantConfigs(result.data);
+            return; // Success, exit early
+          }
         }
+      } catch (backendError) {
+        console.log('Backend not available, using demo tenant configs');
       }
+
+      // Fallback to demo data
+      const { demoData } = await import('./demo-data.js');
+      setTenantConfigs(demoData.tenantConfigs);
     } catch (error) {
       console.error('Error loading tenant configs:', error);
       // Fallback to defaults if API fails
@@ -2174,14 +2198,23 @@ function App() {
     const loadPaymentReport = async (period) => {
       setLoading(true);
       try {
-        const apiUrl = process.env.REACT_APP_API_URL || '';
-        const response = await fetch(`${apiUrl}/api/payment-report?period=${period}`);
-        const result = await response.json();
-        if (result.success) {
-          setReportData(result.data);
-        } else {
-          console.error('Failed to load payment report:', result.error);
+        // Try backend first
+        try {
+          const apiUrl = process.env.REACT_APP_API_URL || '';
+          const response = await fetch(`${apiUrl}/api/payment-report?period=${period}`);
+          const result = await response.json();
+          if (result.success) {
+            setReportData(result.data);
+            return; // Success, exit early
+          }
+        } catch (backendError) {
+          console.log('Backend not available, using demo payment report');
         }
+
+        // Fallback to demo data
+        const { mockAPI } = await import('./demo-data.js');
+        const demoReport = await mockAPI.getPaymentReport(period);
+        setReportData(demoReport);
       } catch (error) {
         console.error('Error loading payment report:', error);
       } finally {
