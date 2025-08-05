@@ -186,6 +186,119 @@ app.post('/api/mark-payment-paid', async (req, res) => {
     }
 });
 
+app.get('/api/payment-report', async (req, res) => {
+    try {
+        const { period = 'ytd' } = req.query;
+        
+        // Get current date for calculations
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth();
+        
+        // Define period filters
+        let startMonth, endMonth;
+        if (period === 'ytd') {
+            startMonth = 'April 25'; // From April 2025
+            endMonth = 'December 25';
+        } else if (period === 'last12') {
+            // Last 12 months from current month
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+            const currentMonthName = months[currentMonth];
+            startMonth = `${currentMonthName} 24`;
+            endMonth = `${currentMonthName} 25`;
+        } else {
+            startMonth = 'April 25';
+            endMonth = 'December 25';
+        }
+        
+        // Filter rent data for the period
+        const periodData = rentData.filter(row => {
+            const monthYear = row.Month;
+            if (period === 'ytd') {
+                return monthYear >= startMonth && monthYear <= endMonth;
+            } else if (period === 'last12') {
+                return monthYear >= startMonth && monthYear <= endMonth;
+            }
+            return true;
+        });
+        
+        // Aggregate payments by tenant
+        const tenantPayments = {};
+        const monthPayments = {};
+        
+        periodData.forEach(row => {
+            const tenant = row.Tenant;
+            const month = row.Month;
+            const amount = parseFloat(row.TotalRent) || 0;
+            const status = row.Status;
+            
+            // Initialize tenant if not exists
+            if (!tenantPayments[tenant]) {
+                tenantPayments[tenant] = {
+                    totalPaid: 0,
+                    totalExpected: 0,
+                    months: []
+                };
+            }
+            
+            // Initialize month if not exists
+            if (!monthPayments[month]) {
+                monthPayments[month] = {
+                    totalPaid: 0,
+                    totalExpected: 0,
+                    tenants: []
+                };
+            }
+            
+            // Add to tenant totals
+            tenantPayments[tenant].totalExpected += amount;
+            if (status === 'Paid') {
+                tenantPayments[tenant].totalPaid += amount;
+            }
+            tenantPayments[tenant].months.push({
+                month,
+                amount,
+                status
+            });
+            
+            // Add to month totals
+            monthPayments[month].totalExpected += amount;
+            if (status === 'Paid') {
+                monthPayments[month].totalPaid += amount;
+            }
+            monthPayments[month].tenants.push({
+                tenant,
+                amount,
+                status
+            });
+        });
+        
+        // Calculate summary
+        const totalPaid = Object.values(tenantPayments).reduce((sum, t) => sum + t.totalPaid, 0);
+        const totalExpected = Object.values(tenantPayments).reduce((sum, t) => sum + t.totalExpected, 0);
+        
+        res.json({
+            success: true,
+            data: {
+                period,
+                summary: {
+                    totalPaid,
+                    totalExpected,
+                    totalPending: totalExpected - totalPaid,
+                    totalTenants: Object.keys(tenantPayments).length
+                },
+                tenantPayments,
+                monthPayments,
+                periodData
+            }
+        });
+    } catch (error) {
+        console.error('Error in payment report:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
 // Initialize data when the function is first called
 let isInitialized = false;
 let initializationPromise = null;
