@@ -488,7 +488,17 @@ function App() {
       );
     }
 
-    const maxAmount = Math.max(...data.map(d => d.expected));
+    // Check if data has the expected structure, if not, return a simple message
+    if (!data[0] || typeof data[0].expected === 'undefined') {
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>{title}</Typography>
+          <Typography variant="body2" color="text.secondary">Chart data not available in demo mode</Typography>
+        </Box>
+      );
+    }
+
+    const maxAmount = Math.max(...data.map(d => d.expected || 0));
     const barHeight = 300;
 
     return (
@@ -652,7 +662,7 @@ function App() {
         {/* Chart and Pending Dues */}
         <Grid item xs={12} lg={8}>
           <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
-            <ProfessionalStackedBarChart data={dashboardData.monthlyData || []} title="Monthly Collection Trend" />
+            <ProfessionalStackedBarChart data={[]} title="Monthly Collection Trend" />
           </Card>
         </Grid>
 
