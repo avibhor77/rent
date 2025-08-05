@@ -2174,8 +2174,7 @@ function App() {
     const loadPaymentReport = async (period) => {
       setLoading(true);
       try {
-        const apiUrl = process.env.REACT_APP_API_URL || '';
-        const response = await fetch(`${apiUrl}/api/payment-report?period=${period}`);
+        const response = await fetch(`/api/payment-report?period=${period}`);
         const result = await response.json();
         if (result.success) {
           setReportData(result.data);
