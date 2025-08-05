@@ -694,7 +694,7 @@ async function updateMeterData(month, updates, isNewEntry = false) {
     }
 }
 
-const PORT = 9999;
+const PORT = process.env.PORT || 9999;
 
 // Global data storage
 let tenantConfigs = {};
