@@ -10,6 +10,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the React app build
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next(); // Let API routes be handled by Express
+  }
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 // Global variables to store data
 let rentData = [];
 let meterData = [];
@@ -694,7 +705,7 @@ async function updateMeterData(month, updates, isNewEntry = false) {
     }
 }
 
-const PORT = process.env.PORT || 9999;
+const PORT = process.env.PORT || 3000;
 
 // Global data storage
 let tenantConfigs = {};
