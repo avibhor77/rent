@@ -123,6 +123,15 @@ app.use(express.json());
 // Serve static files from the React app build
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// Health check endpoint for Docker
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 // Test endpoint for health check
 app.get('/api/test', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });

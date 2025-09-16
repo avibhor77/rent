@@ -13,7 +13,7 @@ echo "✅ Docker is available"
 
 # Build the Docker image
 echo "🔨 Building Docker image..."
-docker build -f Dockerfile.simple -t rent-management-app .
+docker build -f Dockerfile.nas -t rent-management-app .
 
 if [ $? -eq 0 ]; then
     echo "✅ Docker build successful!"
