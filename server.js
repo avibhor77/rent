@@ -6,6 +6,20 @@ const path = require('path');
 const csv = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
+// Audit logging functions
+function logAuditActivity(activity, month, tenant, details, oldValue = '', newValue = '', user = 'System') {
+    try {
+        const timestamp = new Date().toISOString();
+        const auditEntry = `${timestamp},"${activity}","${month}","${tenant}","${details}","${oldValue}","${newValue}","${user}"\n`;
+        
+        // Append to audit log file (never overwrite)
+        fs.appendFileSync('data/audit_log.csv', auditEntry);
+        console.log(`AUDIT: ${activity} - ${tenant} in ${month}: ${details}`);
+    } catch (error) {
+        console.error('Error writing to audit log:', error);
+    }
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -59,7 +73,6 @@ const A206_METER_HEADERS = [
     { id: 'SecondFloorConsumed', title: 'SecondFloorConsumed' },
     { id: 'Self', title: 'Self' },
     { id: 'FinalSecondFloor', title: 'FinalSecondFloor' },
-    { id: 'EnergyUnits', title: 'EnergyUnits' },
     { id: 'GasBill', title: 'GasBill' }
 ];
 
@@ -107,7 +120,6 @@ const a206MeterCsvWriter = createCsvWriter({
         { id: 'SecondFloorConsumed', title: 'SecondFloorConsumed' },
         { id: 'Self', title: 'Self' },
         { id: 'FinalSecondFloor', title: 'FinalSecondFloor' },
-        { id: 'EnergyUnits', title: 'EnergyUnits' },
         { id: 'GasBill', title: 'GasBill' }
     ]
 });
@@ -153,6 +165,7 @@ async function loadRentDataFromCSV() {
                 baseRent: parseFloat(row.BaseRent),
                 maintenance: parseFloat(row.Maintenance),
                 energyCharges: parseFloat(row.EnergyCharges),
+                gasBill: parseFloat(row.GasBill) || 0,
                 status: row.Status
             };
             
@@ -203,7 +216,6 @@ async function loadMeterDataFromCSV() {
                 a206SecondFloorConsumed: parseFloat(row.SecondFloorConsumed) || null,
                 a206Self: parseFloat(row.Self) || null,
                 a206FinalSecondFloor: parseFloat(row.FinalSecondFloor) || null,
-                a206EnergyUnits: parseFloat(row.EnergyUnits) || null,
                 a206GasBill: parseFloat(row.GasBill) || null
             };
         });
@@ -237,14 +249,13 @@ async function loadMeterDataFromCSV() {
             
             combinedData[month] = {
                 ...combinedData[month],
-                a206MainMeter: parseFloat(row.MainMeter) || null,
-                a206TotalConsumed: parseFloat(row.TotalConsumed) || null,
-                a206SecondFloorMeter: parseFloat(row.SecondFloorMeter) || null,
-                a206SecondFloorConsumed: parseFloat(row.SecondFloorConsumed) || null,
-                a206Self: parseFloat(row.Self) || null,
-                a206FinalSecondFloor: parseFloat(row.FinalSecondFloor) || null,
-                a206EnergyUnits: parseFloat(row.EnergyUnits) || null,
-                a206GasBill: parseFloat(row.GasBill) || null
+                a206MainMeter: parseFloat(row.MainMeter) || 0,
+                a206TotalConsumed: parseFloat(row.TotalConsumed) || 0,
+                a206SecondFloorMeter: parseFloat(row.SecondFloorMeter) || 0,
+                a206SecondFloorConsumed: parseFloat(row.SecondFloorConsumed) || 0,
+                a206Self: parseFloat(row.Self) || 0,
+                a206FinalSecondFloor: parseFloat(row.FinalSecondFloor) || 0,
+                a206GasBill: parseFloat(row.GasBill) || 0
             };
         });
         
@@ -485,7 +496,7 @@ async function saveMeterDataToCSV() {
                 }
                 
                 // Update A-206 data
-                if (record.a206MainMeter !== undefined || record.a206TotalConsumed !== undefined || record.a206EnergyUnits !== undefined) {
+                if (record.a206MainMeter !== undefined || record.a206TotalConsumed !== undefined) {
                     
                     const a206Record = {
                         Month: record.month,
@@ -495,7 +506,6 @@ async function saveMeterDataToCSV() {
                         SecondFloorConsumed: record.a206SecondFloorConsumed || 0,
                         Self: record.a206Self || 0,
                         FinalSecondFloor: record.a206FinalSecondFloor || 0,
-                        EnergyUnits: record.a206EnergyUnits || 0,
                         GasBill: record.a206GasBill || 0
                     };
                     
@@ -560,6 +570,99 @@ async function updateRentData(month, tenantKey, updates) {
     } catch (error) {
         console.error('Error updating rent data:', error);
         return false;
+    }
+}
+
+// Function to automatically update rent data CSV with energy charges for unpaid tenants
+async function updateRentDataWithEnergyCharges(month) {
+    try {
+        console.log(`Auto-updating rent data with energy charges for ${month}`);
+        
+        // Calculate energy charges for this month
+        const energyCharges = calculateEnergyCharges(month);
+        
+        if (Object.keys(energyCharges).length === 0) {
+            console.log(`No energy charges calculated for ${month}, skipping rent data update`);
+            return;
+        }
+        
+        // Find the month data in rent data
+        let monthData = rentData.find(m => m.month === month);
+        if (!monthData) {
+            console.log(`No rent data found for ${month}, creating new month data`);
+            monthData = { month: month };
+            rentData.push(monthData);
+        }
+        
+        // Get gas bill from meter data for A-206
+        const meterRecord = meterData.find(m => m.month === month);
+        const a206GasBill = meterRecord ? (meterRecord.a206GasBill || 0) : 0;
+        
+        // Update energy charges for each tenant, but only if they haven't paid yet
+        let updatedCount = 0;
+        for (const [tenantKey, energyCharge] of Object.entries(energyCharges)) {
+            // Check if tenant exists in this month's data
+            if (!monthData[tenantKey]) {
+                // Create new tenant data with base rent and maintenance from config
+                const tenantConfig = tenantConfigs[tenantKey];
+                if (tenantConfig) {
+                    // Add gas bill for A-206 tenant
+                    const gasBill = (tenantKey === 'A-206 2nd') ? a206GasBill : 0;
+                    const calculatedTotal = tenantConfig.baseRent + tenantConfig.maintenance + energyCharge + gasBill;
+                    monthData[tenantKey] = {
+                        totalRent: Math.ceil(calculatedTotal / 10) * 10, // Round final rent to next 10
+                        baseRent: tenantConfig.baseRent,
+                        maintenance: tenantConfig.maintenance,
+                        energyCharges: energyCharge,
+                        gasBill: gasBill,
+                        status: 'Not Paid'
+                    };
+                    updatedCount++;
+                    console.log(`Created new data for ${tenantKey} in ${month} with energy charge ${energyCharge} and gas bill ${gasBill}`);
+                    
+                    // Log new tenant data creation
+                    logAuditActivity('TENANT_DATA_CREATED', month, tenantKey, `New tenant data created with energy charge ₹${energyCharge} and gas bill ₹${gasBill}`, '', `₹${Math.ceil(calculatedTotal / 10) * 10}`, 'System');
+                }
+            } else {
+                // Only update if payment is not done yet
+                if (monthData[tenantKey].status !== 'Paid') {
+                    const oldEnergyCharge = monthData[tenantKey].energyCharges || 0;
+                    const oldTotalRent = monthData[tenantKey].totalRent || 0;
+                    const oldGasBill = monthData[tenantKey].gasBill || 0;
+                    
+                    // Update energy charges and gas bill, then recalculate total rent (round final rent to next 10)
+                    monthData[tenantKey].energyCharges = energyCharge;
+                    // Update gas bill for A-206 tenant (keep existing gas bill for other tenants)
+                    if (tenantKey === 'A-206 2nd') {
+                        monthData[tenantKey].gasBill = a206GasBill;
+                    }
+                    const calculatedTotal = (monthData[tenantKey].baseRent || 0) + 
+                                          (monthData[tenantKey].maintenance || 0) + 
+                                          energyCharge + 
+                                          (monthData[tenantKey].gasBill || 0);
+                    monthData[tenantKey].totalRent = Math.ceil(calculatedTotal / 10) * 10;
+                    
+                    updatedCount++;
+                    console.log(`Updated ${tenantKey} in ${month}: energy charge ${oldEnergyCharge} -> ${energyCharge}, gas bill ${oldGasBill} -> ${monthData[tenantKey].gasBill}, total rent ${oldTotalRent} -> ${monthData[tenantKey].totalRent}`);
+                    
+                    // Log automatic energy charge update
+                    logAuditActivity('ENERGY_CHARGE_AUTO_UPDATED', month, tenantKey, `Auto-calculated from meter readings`, `₹${oldEnergyCharge}`, `₹${energyCharge}`, 'System');
+                } else {
+                    console.log(`Skipping ${tenantKey} in ${month} - already paid`);
+                }
+            }
+        }
+        
+        if (updatedCount > 0) {
+            // Save updated rent data to CSV
+            await saveRentDataToCSV();
+            console.log(`Auto-updated rent data for ${updatedCount} tenants in ${month} with energy charges`);
+        } else {
+            console.log(`No unpaid tenants found to update in ${month}`);
+        }
+        
+    } catch (error) {
+        console.error('Error auto-updating rent data with energy charges:', error);
     }
 }
 
@@ -639,14 +742,24 @@ async function updateMeterData(month, updates, isNewEntry = false) {
                     meterRecord.totalConsumed = meterRecord.mainMeter - previousMonth.mainMeter;
                 }
                 
-                // Calculate first floor consumed
-                if (meterRecord.firstFloor !== undefined && previousMonth.firstFloor !== undefined) {
-                    meterRecord.firstFloorConsumed = meterRecord.firstFloor - previousMonth.firstFloor;
+                // Calculate water consumed
+                if (meterRecord.water !== undefined && previousMonth.water !== undefined) {
+                    const waterConsumed = meterRecord.water - previousMonth.water;
+                    meterRecord.waterPerUnit = Math.ceil(waterConsumed / 3); // Water divided by 3 floors
                 }
                 
-                // Calculate second floor consumed
+                // Calculate first floor consumed (meter reading + water/3)
+                if (meterRecord.firstFloor !== undefined && previousMonth.firstFloor !== undefined) {
+                    const meterConsumed = meterRecord.firstFloor - previousMonth.firstFloor;
+                    const waterShare = meterRecord.waterPerUnit || 0;
+                    meterRecord.firstFloorConsumed = meterConsumed + waterShare;
+                }
+                
+                // Calculate second floor consumed (meter reading + water/3)
                 if (meterRecord.secondFloor !== undefined && previousMonth.secondFloor !== undefined) {
-                    meterRecord.secondFloorConsumed = meterRecord.secondFloor - previousMonth.secondFloor;
+                    const meterConsumed = meterRecord.secondFloor - previousMonth.secondFloor;
+                    const waterShare = meterRecord.waterPerUnit || 0;
+                    meterRecord.secondFloorConsumed = meterConsumed + waterShare;
                 }
                 
                 // Calculate ground floor consumed (total - first - second)
@@ -678,7 +791,7 @@ async function updateMeterData(month, updates, isNewEntry = false) {
             }
         }
         
-        if (meterRecord.a206MainMeter !== undefined || meterRecord.a206TotalConsumed !== undefined || meterRecord.a206EnergyUnits !== undefined) {
+        if (meterRecord.a206MainMeter !== undefined || meterRecord.a206TotalConsumed !== undefined) {
             // Update A-206 CSV
             const a206Record = {
                 Month: month,
@@ -688,7 +801,6 @@ async function updateMeterData(month, updates, isNewEntry = false) {
                 SecondFloorConsumed: meterRecord.a206SecondFloorConsumed || 0,
                 Self: meterRecord.a206Self || 0,
                 FinalSecondFloor: meterRecord.a206FinalSecondFloor || 0,
-                EnergyUnits: meterRecord.a206EnergyUnits || 0,
                 GasBill: meterRecord.a206GasBill || 0
             };
             
@@ -702,6 +814,23 @@ async function updateMeterData(month, updates, isNewEntry = false) {
         energyChargesCache.delete(month);
         dashboardDataCache.clear(); // Clear dashboard cache since energy charges changed
         
+        // Automatically update rent data CSV with energy charges for unpaid tenants
+        await updateRentDataWithEnergyCharges(month);
+        
+        // Also ensure all tenants have rent data for this month (in case some were missing)
+        await ensureAllTenantsHaveRentData(month);
+        
+        // Log meter reading activity
+        if (updates.mainMeter !== undefined || updates.firstFloor !== undefined || updates.secondFloor !== undefined || updates.water !== undefined) {
+            // A-88 meter reading
+            const meterDetails = `Main: ${updates.mainMeter || 'N/A'}, 1st Floor: ${updates.firstFloor || 'N/A'}, 2nd Floor: ${updates.secondFloor || 'N/A'}, Water: ${updates.water || 'N/A'}`;
+            logAuditActivity('METER_READING_ENTERED', month, 'All Tenants', meterDetails, '', '', 'System');
+        } else if (updates.a206MainMeter !== undefined || updates.a206TotalConsumed !== undefined || updates.a206SecondFloorMeter !== undefined) {
+            // A-206 meter reading
+            const meterDetails = `Main: ${updates.a206MainMeter || 'N/A'}, Total Consumed: ${updates.a206TotalConsumed || 'N/A'}, 2nd Floor: ${updates.a206SecondFloorMeter || 'N/A'}, Self: ${updates.a206Self || 'N/A'}`;
+            logAuditActivity('A206_METER_READING_ENTERED', month, 'A-206 2nd', meterDetails, '', '', 'System');
+        }
+        
         const action = isNewEntry ? 'Added' : 'Updated';
         return { success: true, action: action.toLowerCase() };
     } catch (error) {
@@ -710,7 +839,7 @@ async function updateMeterData(month, updates, isNewEntry = false) {
     }
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9999;
 
 // Global data storage
 let tenantConfigs = {};
@@ -796,6 +925,131 @@ async function saveTenantConfigsToCSV() {
     }
 }
 
+// Function to auto-populate rent data for new months
+async function autoPopulateNewMonthRentData() {
+    try {
+        const now = new Date();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = `${monthNames[now.getMonth()]} ${now.getFullYear().toString().slice(-2)}`;
+        
+        // Check if current month data exists
+        const currentMonthData = rentData.find(r => r.month === currentMonth);
+        if (!currentMonthData) {
+            console.log(`Auto-populating rent data for new month: ${currentMonth}`);
+            
+            // Create new month data with all tenants
+            const newMonthData = { month: currentMonth };
+            
+            Object.keys(tenantConfigs).forEach(tenantKey => {
+                const tenantConfig = tenantConfigs[tenantKey];
+                newMonthData[tenantKey] = {
+                    totalRent: tenantConfig.baseRent + tenantConfig.maintenance,
+                    baseRent: tenantConfig.baseRent,
+                    maintenance: tenantConfig.maintenance,
+                    energyCharges: 0, // Will be calculated when meter readings are entered
+                    status: 'Not Paid'
+                };
+            });
+            
+            rentData.push(newMonthData);
+            
+            // Save to CSV
+            await saveRentDataToCSV();
+            console.log(`Auto-populated rent data for ${currentMonth} with ${Object.keys(tenantConfigs).length} tenants`);
+        }
+    } catch (error) {
+        console.error('Error auto-populating new month rent data:', error);
+    }
+}
+
+// Function to ensure all tenants have rent data for a specific month
+async function ensureAllTenantsHaveRentData(month) {
+    try {
+        let monthData = rentData.find(m => m.month === month);
+        if (!monthData) {
+            console.log(`Creating rent data for ${month}`);
+            monthData = { month: month };
+            rentData.push(monthData);
+        }
+        
+        // Get gas bill from meter data for A-206
+        const meterRecord = meterData.find(m => m.month === month);
+        const a206GasBill = meterRecord ? (meterRecord.a206GasBill || 0) : 0;
+        
+        let updated = false;
+        Object.keys(tenantConfigs).forEach(tenantKey => {
+            if (!monthData[tenantKey]) {
+                const tenantConfig = tenantConfigs[tenantKey];
+                const energyCharges = calculateEnergyCharges(month);
+                const energyCharge = energyCharges[tenantKey] || 0;
+                // Add gas bill for A-206 tenant
+                const gasBill = (tenantKey === 'A-206 2nd') ? a206GasBill : 0;
+                const calculatedTotal = tenantConfig.baseRent + tenantConfig.maintenance + energyCharge + gasBill;
+                
+                monthData[tenantKey] = {
+                    totalRent: Math.ceil(calculatedTotal / 10) * 10, // Round final rent to next 10
+                    baseRent: tenantConfig.baseRent,
+                    maintenance: tenantConfig.maintenance,
+                    energyCharges: energyCharge,
+                    gasBill: gasBill,
+                    status: 'Not Paid'
+                };
+                updated = true;
+                console.log(`Added missing tenant data for ${tenantKey} in ${month} with gas bill ${gasBill}`);
+            }
+        });
+        
+        if (updated) {
+            await saveRentDataToCSV();
+            console.log(`Updated rent data for ${month} with missing tenants`);
+        }
+    } catch (error) {
+        console.error('Error ensuring all tenants have rent data:', error);
+    }
+}
+
+// Function to auto-create next month's rent data
+async function autoCreateNextMonthRentData() {
+    try {
+        const now = new Date();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        // Get next month
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const nextMonthName = `${monthNames[nextMonth.getMonth()]} ${nextMonth.getFullYear().toString().slice(-2)}`;
+        
+        // Check if next month data already exists
+        const nextMonthData = rentData.find(r => r.month === nextMonthName);
+        if (!nextMonthData) {
+            console.log(`Auto-creating rent data for next month: ${nextMonthName}`);
+            
+            // Create next month data with all tenants
+            const newMonthData = { month: nextMonthName };
+            
+            Object.keys(tenantConfigs).forEach(tenantKey => {
+                const tenantConfig = tenantConfigs[tenantKey];
+                newMonthData[tenantKey] = {
+                    totalRent: tenantConfig.baseRent + tenantConfig.maintenance,
+                    baseRent: tenantConfig.baseRent,
+                    maintenance: tenantConfig.maintenance,
+                    energyCharges: 0, // Will be calculated when meter readings are entered
+                    status: 'Not Paid'
+                };
+            });
+            
+            rentData.push(newMonthData);
+            
+            // Save to CSV
+            await saveRentDataToCSV();
+            console.log(`Auto-created rent data for ${nextMonthName} with ${Object.keys(tenantConfigs).length} tenants`);
+        }
+    } catch (error) {
+        console.error('Error auto-creating next month rent data:', error);
+    }
+}
+
 // Load data on startup
 async function initializeData() {
     try {
@@ -811,25 +1065,37 @@ async function initializeData() {
             console.log('No CSV data found. Please ensure CSV files are properly configured.');
             return;
         }
-            // Ensure energy charges are calculated after both rent and meter data are loaded
-            console.log('Final energy charge calculation...');
-            rentData.forEach(monthData => {
-                const month = monthData.month;
-                const energyCharges = calculateEnergyCharges(month);
-                console.log(`Final energy charges for ${month}:`, energyCharges);
-                
-                // Update energy charges for each tenant
-                Object.keys(monthData).forEach(tenantKey => {
-                    if (tenantKey !== 'month' && monthData[tenantKey]) {
-                        const tenantConfig = tenantConfigs[tenantKey];
-                        if (tenantConfig && tenantConfig.energyDependent) {
-                            const tenantEnergyCharge = energyCharges[tenantKey] || 0;
-                            monthData[tenantKey].energyCharges = tenantEnergyCharge;
-                            monthData[tenantKey].totalRent = monthData[tenantKey].baseRent + monthData[tenantKey].maintenance + tenantEnergyCharge;
-                        }
+        
+        // Auto-populate new month rent data if needed
+        await autoPopulateNewMonthRentData();
+        
+        // Ensure all tenants have rent data for current month (in case some were missing)
+        const now = new Date();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = `${monthNames[now.getMonth()]} ${now.getFullYear().toString().slice(-2)}`;
+        await ensureAllTenantsHaveRentData(currentMonth);
+        
+        
+        // Ensure energy charges are calculated after both rent and meter data are loaded
+        console.log('Final energy charge calculation...');
+        rentData.forEach(monthData => {
+            const month = monthData.month;
+            const energyCharges = calculateEnergyCharges(month);
+            console.log(`Final energy charges for ${month}:`, energyCharges);
+            
+            // Update energy charges for each tenant
+            Object.keys(monthData).forEach(tenantKey => {
+                if (tenantKey !== 'month' && monthData[tenantKey]) {
+                    const tenantConfig = tenantConfigs[tenantKey];
+                    if (tenantConfig && tenantConfig.energyDependent) {
+                        const tenantEnergyCharge = energyCharges[tenantKey] || 0;
+                        monthData[tenantKey].energyCharges = tenantEnergyCharge;
+                        monthData[tenantKey].totalRent = monthData[tenantKey].baseRent + monthData[tenantKey].maintenance + tenantEnergyCharge;
                     }
-                });
+                }
             });
+        });
     } catch (error) {
         console.error('Error initializing data:', error);
         console.log('Please check CSV file format and permissions.');
@@ -912,29 +1178,54 @@ function calculateEnergyCharges(month) {
     }
     
     const energyCharges = {};
-    const ratePerUnit = 8; // ₹8 per unit
     
-    // Use the consumed energy values from meter data (CSV format)
-    if (meterRecord.groundFloorConsumed) {
-        const groundFloorEnergy = meterRecord.groundFloorConsumed * ratePerUnit;
-        energyCharges['A-88 G'] = groundFloorEnergy;
+    // Get previous month's reading to calculate monthly consumption
+    const monthOrder = [
+        'August 24', 'September 24', 'October 24', 'November 24', 'December 24',
+        'January 25', 'February 25', 'March 25', 'April 25', 'May 25', 'June 25', 'July 25',
+        'August 25', 'September 25', 'October 25', 'November 25', 'December 25'
+    ];
+    
+    const currentMonthIndex = monthOrder.indexOf(month);
+    const previousMonth = currentMonthIndex > 0 ? monthOrder[currentMonthIndex - 1] : null;
+    const previousMeterRecord = previousMonth ? meterData.find(m => m.month === previousMonth) : null;
+    
+    if (!previousMeterRecord) {
+        console.log(`No previous month data found for ${month}`);
+        energyChargesCache.set(month, {});
+        return {};
     }
     
-    if (meterRecord.firstFloorConsumed) {
-        const firstFloorEnergy = meterRecord.firstFloorConsumed * ratePerUnit;
-        energyCharges['A-88 1st'] = firstFloorEnergy;
-    }
+    // Calculate monthly consumption (current - previous)
+    const monthlyMainMeter = meterRecord.mainMeter - previousMeterRecord.mainMeter;
+    const monthlyWater = meterRecord.water - previousMeterRecord.water;
+    const monthlyFirstFloor = meterRecord.firstFloor - previousMeterRecord.firstFloor;
+    const monthlySecondFloor = meterRecord.secondFloor - previousMeterRecord.secondFloor;
     
-    if (meterRecord.secondFloorConsumed) {
-        const secondFloorEnergy = meterRecord.secondFloorConsumed * ratePerUnit;
-        energyCharges['A-88 2nd'] = secondFloorEnergy;
-    }
+    // Calculate water per unit: Monthly water consumption ÷ 3 (divided among 3 floors)
+    const waterPerUnit = monthlyWater / 3;
     
-    // Calculate for A-206 using the energy units field
-    if (meterRecord.a206EnergyUnits) {
-        const a206Energy = meterRecord.a206EnergyUnits * ratePerUnit;
-        energyCharges['A-206 2nd'] = a206Energy;
-    }
+        // First floor (A-88 1st): First floor meter consumption + water per unit
+        const firstFloorConsumption = monthlyFirstFloor + waterPerUnit;
+        const firstFloorEnergy = firstFloorConsumption * 8; // 8 per unit
+        energyCharges['A-88 1st'] = Math.ceil(firstFloorEnergy / 10) * 10; // Round up to next 10
+        
+        // Second floor (A-88 2nd): Second floor meter consumption + water per unit
+        const secondFloorConsumption = monthlySecondFloor + waterPerUnit;
+        const secondFloorEnergy = secondFloorConsumption * 8; // 8 per unit
+        energyCharges['A-88 2nd'] = Math.ceil(secondFloorEnergy / 10) * 10; // Round up to next 10
+        
+        // Ground floor (A-88 G): Main meter consumption - first floor consumption - second floor consumption
+        const groundFloorConsumption = monthlyMainMeter - firstFloorConsumption - secondFloorConsumption;
+        const groundFloorEnergy = groundFloorConsumption * 8; // 8 per unit
+        energyCharges['A-88 G'] = Math.ceil(groundFloorEnergy / 10) * 10; // Round up to next 10
+        
+        // Calculate for A-206 using final second floor * 8 (energy charge only, gas bill handled separately)
+        if (meterRecord.a206FinalSecondFloor !== undefined) {
+            const finalSecondFloor = meterRecord.a206FinalSecondFloor || 0;
+            const a206Energy = finalSecondFloor * 8;
+            energyCharges['A-206 2nd'] = Math.ceil(a206Energy / 10) * 10; // Round up to next 10
+        }
     
     // Cache the result
     energyChargesCache.set(month, energyCharges);
@@ -966,7 +1257,12 @@ function calculateTotalRent(tenant, month) {
 
 app.get('/api/dashboard-data', async (req, res) => {
     try {
-        const { month = 'August 25' } = req.query;
+        // Get current month as default
+        const now = new Date();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = `${monthNames[now.getMonth()]} ${now.getFullYear().toString().slice(-2)}`;
+        const { month = currentMonth } = req.query;
         const normalizedMonth = normalizeMonthFormat(month);
         
         // Check cache first
@@ -985,57 +1281,68 @@ app.get('/api/dashboard-data', async (req, res) => {
         let totalPending = 0;
         const pendingDues = [];
         
-        if (rentRecord) {
-            // Get all tenant keys from the rent record - look for tenant objects
-            const tenantKeys = Object.keys(rentRecord).filter(key => 
-                key !== 'month' && typeof rentRecord[key] === 'object' && rentRecord[key] !== null
-            );
+        // Process ALL tenants from tenant configurations, not just those in rent record
+        Object.keys(tenantConfigs).forEach(tenantKey => {
+            const tenantConfig = tenantConfigs[tenantKey];
+            let tenantData = null;
             
-            tenantKeys.forEach(tenantKey => {
-                const tenantData = rentRecord[tenantKey];
-                const status = tenantData.status || 'Not Paid';
-                const baseRent = tenantData.baseRent || 0;
-                const maintenance = tenantData.maintenance || 0;
-                // Use tenant config misc value if not in rent data
-                const misc = tenantData.misc || tenantConfigs[tenantKey]?.misc || 0;
-                
-                // Use stored energy charges from rent data, fallback to calculated if not available
-                const energyCharge = tenantData.energyCharges || energyCharges[tenantKey] || 0;
-                const expectedAmount = baseRent + maintenance + energyCharge + misc;
-                const isPending = status === 'Not Paid' || status === 'Pending';
-                const pendingAmount = isPending ? expectedAmount : 0;
-                
-                totalExpected += expectedAmount;
-                totalCollected += (status === 'Paid' ? expectedAmount : 0);
-                totalPending += pendingAmount;
-                
-                if (isPending) {
-                    pendingDues.push({
-                        tenant: tenantKey,
-                        name: tenantConfigs[tenantKey]?.name || tenantKey,
-                        amount: pendingAmount
-                    });
-                }
-                
-                dashboardData.push({
+            // Get tenant data from rent record if it exists
+            if (rentRecord) {
+                tenantData = rentRecord[tenantKey];
+            }
+            
+            // Use data from rent record if available, otherwise use tenant config
+            const status = tenantData?.status || 'Not Paid';
+            const baseRent = tenantData?.baseRent || tenantConfig.baseRent;
+            const maintenance = tenantData?.maintenance || tenantConfig.maintenance;
+            const misc = tenantData?.misc || tenantConfig.misc || 0;
+            
+            // Use stored energy charges from rent data, fallback to calculated if not available
+            const energyCharge = tenantData?.energyCharges || energyCharges[tenantKey] || 0;
+            const expectedAmount = baseRent + maintenance + energyCharge + misc;
+            const isPending = status === 'Not Paid' || status === 'Pending';
+            const pendingAmount = isPending ? expectedAmount : 0;
+            
+            totalExpected += expectedAmount;
+            totalCollected += (status === 'Paid' ? expectedAmount : 0);
+            totalPending += pendingAmount;
+            
+            if (isPending) {
+                pendingDues.push({
                     tenant: tenantKey,
-                    name: tenantConfigs[tenantKey]?.name || tenantKey,
-                    phone: tenantConfigs[tenantKey]?.phone || '',
-                    floor: tenantConfigs[tenantKey]?.floor || '',
-                    baseRent: baseRent,
-                    maintenance: maintenance,
-                    misc: misc,
-                    energyCharges: energyCharge,
-                    expectedAmount: expectedAmount,
-                    actualAmount: expectedAmount,
-                    status: status,
-                    pendingAmount: pendingAmount
+                    name: tenantConfig.name || tenantKey,
+                    amount: pendingAmount
                 });
+            }
+            
+            dashboardData.push({
+                tenant: tenantKey,
+                name: tenantConfig.name || tenantKey,
+                phone: tenantConfig.phone || '',
+                floor: tenantConfig.floor || '',
+                baseRent: baseRent,
+                maintenance: maintenance,
+                misc: misc,
+                energyCharges: energyCharge,
+                expectedAmount: expectedAmount,
+                actualAmount: expectedAmount,
+                status: status,
+                pendingAmount: pendingAmount
             });
-        }
+        });
         
-        // Generate monthly trend data (cached separately)
-        const monthlyData = rentData.slice(-12).map(record => {
+        // Generate monthly trend data (cached separately) - sort in descending order
+        const sortedRentData = [...rentData].sort((a, b) => {
+            // Sort months in descending order (newest first)
+            const monthOrder = [
+                'August 24', 'September 24', 'October 24', 'November 24', 'December 24',
+                'January 25', 'February 25', 'March 25', 'April 25', 'May 25', 'June 25', 'July 25',
+                'August 25', 'September 25', 'October 25', 'November 25', 'December 25'
+            ];
+            return monthOrder.indexOf(b.month) - monthOrder.indexOf(a.month);
+        });
+        
+        const monthlyData = sortedRentData.slice(0, 12).map(record => {
             const tenantKeys = Object.keys(record).filter(key => 
                 key !== 'month' && typeof record[key] === 'object' && record[key] !== null
             );
@@ -1053,7 +1360,8 @@ app.get('/api/dashboard-data', async (req, res) => {
                 month: record.month,
                 expected: monthExpected,
                 collected: monthCollected,
-                pending: monthExpected - monthCollected
+                pending: monthExpected - monthCollected,
+                isCurrentMonth: record.month === currentMonth
             };
         });
         
@@ -1105,12 +1413,19 @@ app.get('/api/rent-data', async (req, res) => {
                     result[`${tenantKey}_BaseRent`] = tenantData.baseRent;
                     result[`${tenantKey}_Maintenance`] = tenantData.maintenance;
                     result[`${tenantKey}_EnergyCharges`] = tenantData.energyCharges;
+                    result[`${tenantKey}_GasBill`] = tenantData.gasBill || 0;
                 } else {
-                    result[tenantKey] = 0;
+                    // Calculate total rent for missing tenant data
+                    const tenantConfig = tenantConfigs[tenantKey];
+                    const energyCharge = calculateEnergyCharges(record.month)[tenantKey] || 0;
+                    const totalRent = tenantConfig.baseRent + tenantConfig.maintenance + energyCharge;
+                    
+                    result[tenantKey] = totalRent;
                     result[`${tenantKey}_Status`] = 'Not Paid';
-                    result[`${tenantKey}_BaseRent`] = tenantConfigs[tenantKey].baseRent;
-                    result[`${tenantKey}_Maintenance`] = tenantConfigs[tenantKey].maintenance;
-                    result[`${tenantKey}_EnergyCharges`] = calculateEnergyCharges(record.month)[tenantKey] || 0;
+                    result[`${tenantKey}_BaseRent`] = tenantConfig.baseRent;
+                    result[`${tenantKey}_Maintenance`] = tenantConfig.maintenance;
+                    result[`${tenantKey}_EnergyCharges`] = energyCharge;
+                    result[`${tenantKey}_GasBill`] = 0;
                 }
             });
             
@@ -1158,7 +1473,6 @@ app.get('/api/meter-data', async (req, res) => {
             result.a206SecondFloorConsumed = record.a206SecondFloorConsumed;
             result.a206Self = record.a206Self;
             result.a206FinalSecondFloor = record.a206FinalSecondFloor;
-            result.a206EnergyUnits = record.a206EnergyUnits;
             result.a206TotalConsumed = record.a206TotalConsumed;
             result.a206GasBill = record.a206GasBill;
             
@@ -1210,6 +1524,10 @@ app.post('/api/mark-payment-paid', async (req, res) => {
         const { tenant, month } = req.body;
         const normalizedMonth = normalizeMonthFormat(month);
         
+        // Get current rent data before updating
+        const monthData = rentData.find(m => m.month === normalizedMonth);
+        const currentTotalRent = monthData && monthData[tenant] ? monthData[tenant].totalRent : 'Unknown';
+        
         // Update rent data and save to CSV
         const success = await updateRentData(normalizedMonth, tenant, { status: 'Paid' });
         
@@ -1220,12 +1538,14 @@ app.post('/api/mark-payment-paid', async (req, res) => {
             });
         }
         
+        // Log payment activity
+        logAuditActivity('PAYMENT_MARKED_PAID', normalizedMonth, tenant, `Payment received for ₹${currentTotalRent}`, 'Not Paid', 'Paid', 'System');
+        
         res.json({ 
             success: true, 
             message: `Payment marked as paid for ${tenant} for ${month} and saved to CSV`,
             data: { tenant, month, status: 'Paid' }
         });
-        
     } catch (error) {
         console.error('Error marking payment as paid:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -1236,6 +1556,33 @@ app.post('/api/adjust-rent', async (req, res) => {
     try {
         const { tenant, month, totalRent, baseRent, maintenance, energyCharges, gasBill, status } = req.body;
         const normalizedMonth = normalizeMonthFormat(month);
+        
+        // Prevent updating past months - only allow current month and future months
+        const now = new Date();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = `${monthNames[now.getMonth()]} ${now.getFullYear().toString().slice(-2)}`;
+        
+        // Parse the requested month
+        const [monthName, year] = normalizedMonth.split(' ');
+        const monthIndex = monthNames.indexOf(monthName);
+        const monthYear = parseInt('20' + year);
+        
+        // Parse current month
+        const [currentMonthName, currentYearStr] = currentMonth.split(' ');
+        const currentMonthIndex = monthNames.indexOf(currentMonthName);
+        const currentYear = parseInt('20' + currentYearStr);
+        
+        // Check if the requested month is in the past
+        const isPastMonth = (monthYear < currentYear) || 
+                           (monthYear === currentYear && monthIndex < currentMonthIndex);
+        
+        if (isPastMonth) {
+            return res.status(400).json({ 
+                success: false, 
+                error: `Cannot update past month ${normalizedMonth}. Only current month (${currentMonth}) and future months can be updated.` 
+            });
+        }
         
         console.log('Adjusting rent for:', { tenant, month: normalizedMonth, totalRent, baseRent, maintenance, energyCharges, gasBill, status });
         
@@ -1260,6 +1607,10 @@ app.post('/api/adjust-rent', async (req, res) => {
             status: status || 'Not Paid'
         };
         
+        // Get old values for audit log
+        const oldTotalRent = monthData[tenant] ? monthData[tenant].totalRent : 0;
+        const oldStatus = monthData[tenant] ? monthData[tenant].status : 'Not Paid';
+        
         monthData[tenant] = { ...monthData[tenant], ...updates };
         
         // Save to CSV
@@ -1267,6 +1618,14 @@ app.post('/api/adjust-rent', async (req, res) => {
         
         // Clear dashboard cache since rent data changed
         dashboardDataCache.clear();
+        
+        // Log rent adjustment activity
+        const rentDetails = `Base: ₹${baseRent}, Maintenance: ₹${maintenance}, Energy: ₹${energyCharges}, Gas: ₹${gasBill}`;
+        logAuditActivity('RENT_ADJUSTED', normalizedMonth, tenant, rentDetails, `₹${oldTotalRent}`, `₹${totalRent}`, 'System');
+        
+        if (oldStatus !== status) {
+            logAuditActivity('STATUS_CHANGED', normalizedMonth, tenant, `Status changed`, oldStatus, status, 'System');
+        }
         
         console.log(`Updated rent data for ${tenant} in ${normalizedMonth} and saved to CSV`);
         
@@ -1310,6 +1669,48 @@ app.get('/api/month-exists/:month', async (req, res) => {
         res.json({ month, exists });
     } catch (error) {
         console.error('Error checking month existence:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API endpoint to get audit log
+app.get('/api/audit-log', async (req, res) => {
+    try {
+        const { limit = 100, activity = '', tenant = '', month = '' } = req.query;
+        
+        const auditData = [];
+        
+        if (fs.existsSync('data/audit_log.csv')) {
+            await new Promise((resolve, reject) => {
+                fs.createReadStream('data/audit_log.csv')
+                    .pipe(csv())
+                    .on('data', (row) => {
+                        // Filter by activity, tenant, or month if specified
+                        if (activity && !row.Activity.toLowerCase().includes(activity.toLowerCase())) return;
+                        if (tenant && !row.Tenant.toLowerCase().includes(tenant.toLowerCase())) return;
+                        if (month && !row.Month.toLowerCase().includes(month.toLowerCase())) return;
+                        
+                        auditData.push(row);
+                    })
+                    .on('end', resolve)
+                    .on('error', reject);
+            });
+        }
+        
+        // Sort by timestamp (newest first) and limit results
+        const sortedData = auditData
+            .sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp))
+            .slice(0, parseInt(limit));
+        
+        res.json({
+            success: true,
+            data: sortedData,
+            total: auditData.length,
+            returned: sortedData.length
+        });
+        
+    } catch (error) {
+        console.error('Error fetching audit log:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -1396,9 +1797,6 @@ app.post('/api/update-a206-meter', async (req, res) => {
             });
         }
         
-        // Calculate energy units (total consumed + self)
-        const energyUnits = (totalConsumed || 0) + (self || 0);
-        
         const a206Data = {
             a206MainMeter: mainMeter,
             a206TotalConsumed: totalConsumed,
@@ -1406,7 +1804,6 @@ app.post('/api/update-a206-meter', async (req, res) => {
             a206SecondFloorConsumed: secondFloorConsumed || 0,
             a206Self: self || 0,
             a206FinalSecondFloor: finalSecondFloor || 0,
-            a206EnergyUnits: energyUnits,
             a206GasBill: gasBill || 0
         };
         
@@ -1431,10 +1828,9 @@ app.post('/api/update-a206-meter', async (req, res) => {
                 secondFloorConsumed,
                 self,
                 finalSecondFloor,
-                energyUnits,
-                energyCharge: energyUnits * 8,
                 gasBill,
-                totalBill: (energyUnits * 8) + (gasBill || 0)
+                energyCharge: (finalSecondFloor || 0) + (gasBill || 0),
+                totalBill: (finalSecondFloor || 0) + (gasBill || 0)
             }
         });
         
@@ -1458,11 +1854,26 @@ app.post('/api/update-tenant-config', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid tenant key' });
         }
 
+        // Get old values for audit log
+        const oldConfig = { ...tenantConfigs[tenantKey] };
+        
         // Update the tenant configuration
         tenantConfigs[tenantKey] = { ...tenantConfigs[tenantKey], ...updates };
         
         // Save to CSV
         await saveTenantConfigsToCSV();
+        
+        // Log tenant configuration changes
+        const changes = [];
+        Object.keys(updates).forEach(key => {
+            if (oldConfig[key] !== updates[key]) {
+                changes.push(`${key}: ${oldConfig[key]} → ${updates[key]}`);
+            }
+        });
+        
+        if (changes.length > 0) {
+            logAuditActivity('TENANT_CONFIG_UPDATED', 'All Months', tenantKey, changes.join(', '), JSON.stringify(oldConfig), JSON.stringify(tenantConfigs[tenantKey]), 'System');
+        }
         
         res.json({ success: true, message: 'Tenant configuration updated successfully', data: tenantConfigs[tenantKey] });
     } catch (error) {
@@ -1632,6 +2043,90 @@ app.get('/api/payment-report', (req, res) => {
         
     } catch (error) {
         console.error('Error generating payment report:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Payment Summary API endpoint
+app.get('/api/payment-summary', async (req, res) => {
+    try {
+        if (!rentData || rentData.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
+
+        // Use the same logic as /api/rent-data to get the correct data structure
+        const rentDataWithCalculations = rentData.map(record => {
+            const energyCharges = calculateEnergyCharges(record.month);
+            const result = { month: record.month };
+            
+            Object.keys(tenantConfigs).forEach(tenantKey => {
+                const tenantData = record[tenantKey];
+                if (tenantData) {
+                    result[tenantKey] = tenantData.totalRent;
+                    result[`${tenantKey}_Status`] = tenantData.status;
+                    result[`${tenantKey}_BaseRent`] = tenantData.baseRent;
+                    result[`${tenantKey}_Maintenance`] = tenantData.maintenance;
+                    result[`${tenantKey}_EnergyCharges`] = tenantData.energyCharges;
+                    result[`${tenantKey}_GasBill`] = tenantData.gasBill || 0;
+                } else {
+                    result[tenantKey] = 0;
+                    result[`${tenantKey}_Status`] = 'Not Paid';
+                    result[`${tenantKey}_BaseRent`] = tenantConfigs[tenantKey].baseRent;
+                    result[`${tenantKey}_Maintenance`] = tenantConfigs[tenantKey].maintenance;
+                    result[`${tenantKey}_EnergyCharges`] = calculateEnergyCharges(record.month)[tenantKey] || 0;
+                    result[`${tenantKey}_GasBill`] = 0;
+                }
+            });
+            
+            return result;
+        });
+
+        const summaryData = [];
+        rentDataWithCalculations.forEach(record => {
+            const month = record.month;
+            Object.keys(tenantConfigs).forEach(tenantKey => {
+                const tenantConfig = tenantConfigs[tenantKey];
+                const totalRent = record[tenantKey] || 0;
+                const status = record[`${tenantKey}_Status`] || 'Not Paid';
+                const baseRent = record[`${tenantKey}_BaseRent`] || 0;
+                const maintenance = record[`${tenantKey}_Maintenance`] || 0;
+                const energyCharges = record[`${tenantKey}_EnergyCharges`] || 0;
+                const gasBill = record[`${tenantKey}_GasBill`] || 0;
+
+                summaryData.push({
+                    id: `${month}_${tenantKey}`,
+                    month: month,
+                    tenant: tenantKey,
+                    name: tenantConfig?.name || tenantKey,
+                    phone: tenantConfig?.phone || '',
+                    floor: tenantConfig?.floor || '',
+                    baseRent: baseRent,
+                    maintenance: maintenance,
+                    energyCharges: energyCharges,
+                    totalRent: totalRent,
+                    gasBill: gasBill,
+                    status: status
+                });
+            });
+        });
+
+        // Sort by month (newest first)
+        summaryData.sort((a, b) => {
+            const [aMonth, aYear] = a.month.split(' ');
+            const [bMonth, bYear] = b.month.split(' ');
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            const aIndex = monthNames.indexOf(aMonth) + (parseInt('20' + aYear) * 12);
+            const bIndex = monthNames.indexOf(bMonth) + (parseInt('20' + bYear) * 12);
+            return bIndex - aIndex;
+        });
+
+        res.json({
+            success: true,
+            data: summaryData
+        });
+    } catch (error) {
+        console.error('Error fetching payment summary:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });

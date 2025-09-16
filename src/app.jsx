@@ -54,8 +54,10 @@ import {
   Check as CheckIcon,
   Add as AddIcon,
   Settings as SettingsIcon,
-  BarChart as BarChartIcon
+  BarChart as BarChartIcon,
+  TableChart as TableChartIcon
 } from '@mui/icons-material';
+import PaymentSummaryCsvEditor from './components/PaymentSummaryCsvEditor';
 
 function App() {
   const navigate = useNavigate();
@@ -101,15 +103,13 @@ function App() {
     const monthIndex = monthNames.indexOf(monthName);
     const monthYear = parseInt('20' + year);
     
-    // For rent management, consider "August 25" as the current month
-    // Only months after August 25 are future months
-    const currentRentMonth = 'August 25';
-    const [currentMonthName, currentYearStr] = currentRentMonth.split(' ');
-    const currentMonthIndex = monthNames.indexOf(currentMonthName);
-    const currentRentYear = parseInt('20' + currentYearStr);
+    // Get actual current month
+    const now = new Date();
+    const currentMonthIndex = now.getMonth();
+    const currentYear = now.getFullYear();
     
-    if (monthYear > currentRentYear) return true;
-    if (monthYear === currentRentYear && monthIndex > currentMonthIndex) return true;
+    if (monthYear > currentYear) return true;
+    if (monthYear === currentYear && monthIndex > currentMonthIndex) return true;
     return false;
   };
 
@@ -118,6 +118,7 @@ function App() {
     const tab = searchParams.get('tab');
     return tab ? parseInt(tab) : 0;
   });
+  const [auditData, setAuditData] = useState([]);
   const [dashboardData, setDashboardData] = useState({
     tenants: [],
     summary: { expected: 0, collected: 0, pending: 0, totalTenants: 0 },
@@ -127,7 +128,14 @@ function App() {
   const [rentData, setRentData] = useState([]);
   const [meterData, setMeterData] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(() => {
-    return searchParams.get('month') || 'August 25';
+    const month = searchParams.get('month');
+    if (month) return month;
+    
+    // Default to current month
+    const now = new Date();
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[now.getMonth()]} ${now.getFullYear().toString().slice(-2)}`;
   });
   const [selectedTenant, setSelectedTenant] = useState(() => {
     return searchParams.get('tenant') || 'A-88 G';
@@ -180,6 +188,13 @@ function App() {
     loadTenantConfigs();
   }, [selectedMonth]);
 
+  // Load audit data when switching to audit tab
+  useEffect(() => {
+    if (activeTab === 5) {
+      loadAuditData();
+    }
+  }, [activeTab]);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -206,6 +221,29 @@ function App() {
       setOpenSnackbar(true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAuditData = async () => {
+    try {
+      const apiUrl = getApiUrl();
+      const auditRes = await fetch(`${apiUrl}/api/audit-log?limit=200`);
+      const auditData = await auditRes.json();
+      if (auditData.success) {
+        // Filter out any entries with missing required fields
+        const validAuditData = (auditData.data || []).filter(entry => 
+          entry && typeof entry === 'object'
+        );
+        setAuditData(validAuditData);
+      } else {
+        console.error('Audit data loading failed:', auditData.error);
+        setAuditData([]);
+      }
+    } catch (error) {
+      console.error('Error loading audit data:', error);
+      setMessage('Error loading audit data: ' + error.message);
+      setOpenSnackbar(true);
+      setAuditData([]);
     }
   };
 
@@ -237,7 +275,7 @@ function App() {
       setOpenSnackbar(true);
     } finally {
       setActionLoading(prev => ({ ...prev, [`mark-paid-${tenantKey}`]: false }));
-      handleMenuClose();
+    handleMenuClose();
     }
   };
 
@@ -539,11 +577,25 @@ function App() {
 
   const DashboardTab = () => (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'stretch', sm: 'center' }, 
+        mb: 3,
+        gap: { xs: 2, sm: 0 }
+      }}>
+        <Typography variant="h4" sx={{ 
+          fontSize: { xs: '1.5rem', sm: '2.125rem' },
+          textAlign: { xs: 'center', sm: 'left' }
+        }}>
           Dashboard - {selectedMonth}
         </Typography>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl size="small" sx={{ 
+          minWidth: { xs: '100%', sm: 150 },
+          maxWidth: { xs: 200, sm: 'none' },
+          alignSelf: { xs: 'center', sm: 'auto' }
+        }}>
           <Select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
@@ -634,14 +686,21 @@ function App() {
         {/* Chart and Pending Dues */}
         <Grid item xs={12} lg={8}>
           <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
+            <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <ProfessionalStackedBarChart data={dashboardData.monthlyData || []} title="Monthly Collection Trend" />
+            </Box>
           </Card>
         </Grid>
 
         <Grid item xs={12} lg={4}>
           <Card sx={{ borderRadius: 2, boxShadow: 2, height: 'fit-content' }}>
-            <CardContent sx={{ p: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#d32f2f' }}>
+            <CardContent sx={{ p: { xs: 1, sm: 2 } }}>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                mb: 2, 
+                color: '#d32f2f',
+                fontSize: { xs: '1rem', sm: '1.25rem' }
+              }}>
                 ⚠️ Pending Dues - {selectedMonth}
               </Typography>
               <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
@@ -717,34 +776,35 @@ function App() {
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
                 Tenant Payment Summary
               </Typography>
-              <TableContainer>
+              <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <TableContainer sx={{ minWidth: { xs: 800, sm: 'auto' } }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 600 }}>Tenant</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Base Rent</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Maintenance</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Misc</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Energy</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Expected</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Actual</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 80, sm: 'auto' } }}>Tenant</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 120, sm: 'auto' } }}>Name</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 100, sm: 'auto' } }}>Base Rent</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 100, sm: 'auto' } }}>Maintenance</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 80, sm: 'auto' } }}>Misc</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 100, sm: 'auto' } }}>Energy</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 100, sm: 'auto' } }}>Expected</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 100, sm: 'auto' } }}>Actual</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 80, sm: 'auto' } }}>Status</TableCell>
+                        <TableCell sx={{ fontWeight: 600, minWidth: { xs: 60, sm: 'auto' } }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {dashboardData.tenants.map(tenant => (
                       <TableRow key={tenant.tenant} hover>
-                        <TableCell sx={{ fontWeight: 500 }}>{tenant.tenant}</TableCell>
-                        <TableCell>{tenant.name}</TableCell>
-                        <TableCell>₹{tenant.baseRent.toLocaleString()}</TableCell>
-                        <TableCell>₹{tenant.maintenance.toLocaleString()}</TableCell>
-                        <TableCell>₹{tenant.misc.toLocaleString()}</TableCell>
-                        <TableCell>₹{tenant.energyCharges.toLocaleString()}</TableCell>
-                        <TableCell>₹{tenant.expectedAmount.toLocaleString()}</TableCell>
-                        <TableCell>₹{tenant.actualAmount.toLocaleString()}</TableCell>
-                        <TableCell>
+                          <TableCell sx={{ fontWeight: 500, minWidth: { xs: 80, sm: 'auto' } }}>{tenant.tenant}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 120, sm: 'auto' } }}>{tenant.name}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 100, sm: 'auto' } }}>₹{tenant.baseRent.toLocaleString()}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 100, sm: 'auto' } }}>₹{tenant.maintenance.toLocaleString()}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 80, sm: 'auto' } }}>₹{tenant.misc.toLocaleString()}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 100, sm: 'auto' } }}>₹{tenant.energyCharges.toLocaleString()}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 100, sm: 'auto' } }}>₹{tenant.expectedAmount.toLocaleString()}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 100, sm: 'auto' } }}>₹{tenant.actualAmount.toLocaleString()}</TableCell>
+                          <TableCell sx={{ minWidth: { xs: 80, sm: 'auto' } }}>
                           <Chip
                             label={tenant.status}
                             color={tenant.status === 'Paid' ? 'success' : 'error'}
@@ -752,7 +812,7 @@ function App() {
                             size="small"
                           />
                         </TableCell>
-                        <TableCell>
+                          <TableCell sx={{ minWidth: { xs: 60, sm: 'auto' } }}>
                           <IconButton
                             onClick={(e) => handleMenuOpen(e, tenant)}
                             size="small"
@@ -771,6 +831,7 @@ function App() {
                   </TableBody>
                 </Table>
               </TableContainer>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -832,26 +893,49 @@ function App() {
     const getTenantData = (tenantKey) => {
       const tenantConfig = tenantConfigs[tenantKey];
       if (!tenantConfig) return null;
-      
+
       if (currentMonthData) {
+        // Use rentData for all dynamic fields, fallback to config if missing
+        const baseRent = currentMonthData[`${tenantKey}_BaseRent`] !== undefined ? currentMonthData[`${tenantKey}_BaseRent`] : tenantConfig.baseRent || 0;
+        const maintenance = currentMonthData[`${tenantKey}_Maintenance`] !== undefined ? currentMonthData[`${tenantKey}_Maintenance`] : tenantConfig.maintenance || 0;
+        const misc = currentMonthData[`${tenantKey}_Misc`] !== undefined ? currentMonthData[`${tenantKey}_Misc`] : 0;
+        const energyCharges = currentMonthData[`${tenantKey}_EnergyCharges`] !== undefined ? currentMonthData[`${tenantKey}_EnergyCharges`] : 0;
+        const gasBill = currentMonthData[`${tenantKey}_GasBill`] !== undefined ? currentMonthData[`${tenantKey}_GasBill`] : 0;
+        // Always recalculate totalRent from components to reflect latest updates
+        const totalRent = baseRent + maintenance + misc + energyCharges + gasBill;
+        const status = currentMonthData[`${tenantKey}_Status`] || 'Not Paid';
+
         return {
           tenantKey,
-          totalRent: currentMonthData[tenantKey] || 0,
-          baseRent: tenantConfig.baseRent || 0,
-          maintenance: tenantConfig.maintenance || 0,
-          energyCharges: currentMonthData[`${tenantKey}_EnergyCharges`] || 0,
-          gasBill: currentMonthData[`${tenantKey}_GasBill`] || 0,
-          status: currentMonthData[`${tenantKey}_Status`] || 'Not Paid'
+          name: tenantConfig.name,
+          phone: tenantConfig.phone,
+          address: tenantConfig.address,
+          floor: tenantConfig.floor,
+          baseRent,
+          maintenance,
+          misc,
+          energyCharges,
+          gasBill,
+          totalRent,
+          status,
+          notes: tenantConfig.notes,
         };
       } else {
+        // Fallback to config if no rentData for this month
         return {
           tenantKey,
-          totalRent: tenantConfig.baseRent + tenantConfig.maintenance,
-          baseRent: tenantConfig.baseRent || 0,
-          maintenance: tenantConfig.maintenance || 0,
+          name: tenantConfig.name,
+          phone: tenantConfig.phone,
+          address: tenantConfig.address,
+          floor: tenantConfig.floor,
+          baseRent: tenantConfig.baseRent,
+          maintenance: tenantConfig.maintenance,
+          misc: 0,
           energyCharges: 0,
           gasBill: 0,
-          status: 'Not Paid'
+          totalRent: tenantConfig.baseRent + tenantConfig.maintenance,
+          status: 'Not Paid',
+          notes: tenantConfig.notes,
         };
       }
     };
@@ -896,19 +980,31 @@ function App() {
     const saveEditPayment = async () => {
       try {
         setActionLoading(prev => ({ ...prev, 'edit-payment': true }));
-        
+
+        // Recalculate totalRent from the edited fields
+        const baseRent = parseFloat(editForm.baseRent) || 0;
+        const maintenance = parseFloat(editForm.maintenance) || 0;
+        const energyCharges = parseFloat(editForm.energyCharges) || 0;
+        const gasBill = parseFloat(editForm.gasBill) || 0;
+        const totalRent = baseRent + maintenance + energyCharges + gasBill;
+
         const response = await fetch('/api/adjust-rent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             tenant: selectedTenantForEdit.tenantKey,
             month: selectedMonth,
-            ...editForm
+            totalRent,
+            baseRent,
+            maintenance,
+            energyCharges,
+            gasBill,
+            status: editForm.status
           })
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
           setEditDialogOpen(false);
           setMessage(result.message || 'Payment updated successfully');
@@ -930,15 +1026,19 @@ function App() {
     const handleAddFuturePayment = (tenant) => {
       const baseRent = tenant.baseRent || 0;
       const maintenance = tenant.maintenance || 0;
+      const energyCharges = tenant.energyCharges || 0;
+      const misc = tenant.misc || 0;
+      const gasBill = tenant.gasBill || 0;
       
       setFuturePaymentForm({
         month: selectedMonth,
         tenant: tenant.tenantKey,
-        totalRent: baseRent + maintenance,
+        totalRent: baseRent + maintenance + energyCharges + misc + gasBill,
         baseRent: baseRent,
         maintenance: maintenance,
-        energyCharges: 0,
-        gasBill: 0,
+        energyCharges: energyCharges,
+        misc: misc,
+        gasBill: gasBill,
         status: 'Not Paid'
       });
       setFuturePaymentDialogOpen(true);
@@ -1697,14 +1797,25 @@ function App() {
       if (!tenantConfig) return null;
       
       if (currentMonthData) {
-        return {
-          tenantKey,
-          totalRent: currentMonthData[tenantKey] || 0,
-          baseRent: tenantConfig.baseRent || 0,
-          maintenance: tenantConfig.maintenance || 0,
-          energyCharges: currentMonthData[`${tenantKey}_EnergyCharges`] || 0,
-          gasBill: currentMonthData[`${tenantKey}_GasBill`] || 0,
-          status: currentMonthData[`${tenantKey}_Status`] || 'Not Paid'
+        // Use rentData for all dynamic fields, fallback to config if missing
+        const baseRent = currentMonthData[`${tenantKey}_BaseRent`] !== undefined ? currentMonthData[`${tenantKey}_BaseRent`] : tenantConfig.baseRent || 0;
+        const maintenance = currentMonthData[`${tenantKey}_Maintenance`] !== undefined ? currentMonthData[`${tenantKey}_Maintenance`] : tenantConfig.maintenance || 0;
+        const misc = currentMonthData[`${tenantKey}_Misc`] !== undefined ? currentMonthData[`${tenantKey}_Misc`] : 0;
+        const energyCharges = currentMonthData[`${tenantKey}_EnergyCharges`] !== undefined ? currentMonthData[`${tenantKey}_EnergyCharges`] : 0;
+        const gasBill = currentMonthData[`${tenantKey}_GasBill`] !== undefined ? currentMonthData[`${tenantKey}_GasBill`] : 0;
+        // Always recalculate totalRent from components to reflect latest updates
+        const totalRent = baseRent + maintenance + misc + energyCharges + gasBill;
+        const status = currentMonthData[`${tenantKey}_Status`] || 'Not Paid';
+      
+      return {
+        tenantKey,
+          totalRent,
+          baseRent,
+          maintenance,
+          misc,
+          energyCharges,
+          gasBill,
+          status
         };
       } else {
         return {
@@ -1712,6 +1823,7 @@ function App() {
           totalRent: tenantConfig.baseRent + tenantConfig.maintenance,
           baseRent: tenantConfig.baseRent || 0,
           maintenance: tenantConfig.maintenance || 0,
+          misc: 0,
           energyCharges: 0,
           gasBill: 0,
           status: 'Not Paid'
@@ -1793,15 +1905,19 @@ function App() {
     const handleAddFuturePayment = (tenant) => {
       const baseRent = tenant.baseRent || 0;
       const maintenance = tenant.maintenance || 0;
+      const energyCharges = tenant.energyCharges || 0;
+      const misc = tenant.misc || 0;
+      const gasBill = tenant.gasBill || 0;
       
       setFuturePaymentForm({
         month: selectedMonth,
         tenant: tenant.tenantKey,
-        totalRent: baseRent + maintenance,
+        totalRent: baseRent + maintenance + energyCharges + misc + gasBill,
         baseRent: baseRent,
         maintenance: maintenance,
-        energyCharges: 0,
-        gasBill: 0,
+        energyCharges: energyCharges,
+        misc: misc,
+        gasBill: gasBill,
         status: 'Not Paid'
       });
       setFuturePaymentDialogOpen(true);
@@ -1856,9 +1972,9 @@ function App() {
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box>
-            <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" gutterBottom>
               Tenant Configuration & Quick Actions
-            </Typography>
+          </Typography>
             <Typography variant="body1" color="text.secondary">
               Condensed view of all tenants with base rent, maintenance, energy costs, and payment status
             </Typography>
@@ -1889,7 +2005,7 @@ function App() {
             const tenant = getTenantData(tenantKey);
             
             if (!tenant) return null;
-
+            
             return (
               <Grid item xs={12} md={6} lg={4} key={tenantKey}>
                 <Card sx={{ height: '100%' }}>
@@ -1899,7 +2015,7 @@ function App() {
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mb: 0.5 }}>
                           {tenantConfig.name}
-                        </Typography>
+                      </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                           {tenantKey} • {tenantConfig.floor} Floor
                         </Typography>
@@ -1914,42 +2030,42 @@ function App() {
                         sx={{ ml: 1, minWidth: 60 }}
                       />
                     </Box>
-
+                    
                     {/* Compact Rent Details */}
                     <Box sx={{ mb: 2 }}>
                       <Grid container spacing={1}>
-                        <Grid item xs={6}>
+                      <Grid item xs={6}>
                           <Typography variant="caption" color="text.secondary">Base Rent</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            ₹{tenant.baseRent?.toLocaleString() || 0}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
+                          ₹{tenant.baseRent?.toLocaleString() || 0}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
                           <Typography variant="caption" color="text.secondary">Maintenance</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            ₹{tenant.maintenance?.toLocaleString() || 0}
-                          </Typography>
-                        </Grid>
+                          ₹{tenant.maintenance?.toLocaleString() || 0}
+                        </Typography>
+                      </Grid>
                         {tenant.energyCharges > 0 && (
-                          <Grid item xs={6}>
+                      <Grid item xs={6}>
                             <Typography variant="caption" color="text.secondary">Energy</Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600, color: 'warning.main' }}>
-                              ₹{tenant.energyCharges?.toLocaleString() || 0}
-                            </Typography>
-                          </Grid>
+                          ₹{tenant.energyCharges?.toLocaleString() || 0}
+                        </Typography>
+                      </Grid>
                         )}
-                        <Grid item xs={6}>
+                      <Grid item xs={6}>
                           <Typography variant="caption" color="text.secondary">Total</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
                             {isFutureMonth(selectedMonth) && tenant.totalRent === 0 ?
                               'Not Set' :
                               `₹${tenant.totalRent?.toLocaleString() || 0}`
                             }
-                          </Typography>
-                        </Grid>
+                        </Typography>
                       </Grid>
+                    </Grid>
                     </Box>
-
+                    
                     {/* Quick Actions */}
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       <Button
@@ -2051,12 +2167,12 @@ function App() {
                 <FormControl fullWidth>
                   <InputLabel>Status</InputLabel>
                   <Select
-                    value={editForm.status}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                  value={editForm.status}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
                     label="Status"
-                  >
-                    <MenuItem value="Paid">Paid</MenuItem>
-                    <MenuItem value="Not Paid">Not Paid</MenuItem>
+                >
+                  <MenuItem value="Paid">Paid</MenuItem>
+                  <MenuItem value="Not Paid">Not Paid</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -2274,7 +2390,7 @@ function App() {
                   </Box>
                   <Typography variant="caption" sx={{ textAlign: 'center', fontSize: '0.6rem', mb: 0.25, fontWeight: 500 }}>
                     {item.name}
-                  </Typography>
+      </Typography>
                   <Typography variant="caption" sx={{ fontWeight: 600, color: item.color, fontSize: '0.65rem' }}>
                     ₹{(item.totalPaid / 1000).toFixed(0)}k
                   </Typography>
@@ -2345,14 +2461,14 @@ function App() {
                     {getPeriodOptions().map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
-                      </MenuItem>
-                    ))}
+            </MenuItem>
+          ))}
                   </Select>
                 </FormControl>
               </Box>
             </CardContent>
           </Card>
-        </Box>
+      </Box>
 
         {loading && (
           <Box sx={{ 
@@ -2392,10 +2508,10 @@ function App() {
                            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
                              <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, color: colors.primary }}>
                                {formatCurrency(reportData.totalPayments)}
-                             </Typography>
+                  </Typography>
                              <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 0.5, color: colors.textPrimary }}>
                                Total Payments
-                             </Typography>
+                  </Typography>
                              <Typography variant="body2" sx={{ color: colors.textSecondary }}>
                                {reportData.totalRecords} transactions
                              </Typography>
@@ -2419,13 +2535,13 @@ function App() {
                            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
                              <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, color: colors.success }}>
                                {reportData.tenantCount}
-                             </Typography>
+                  </Typography>
                              <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 0.5, color: colors.textPrimary }}>
                                Active Tenants
-                             </Typography>
+                  </Typography>
                              <Typography variant="body2" sx={{ color: colors.textSecondary }}>
                                Made payments
-                             </Typography>
+                    </Typography>
                            </CardContent>
                          </Card>
                        </Grid>
@@ -2446,7 +2562,7 @@ function App() {
                            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
                              <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, color: colors.warning }}>
                                {formatCurrency(reportData.summary.averagePerTenant)}
-                             </Typography>
+                  </Typography>
                              <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 0.5, color: colors.textPrimary }}>
                                Average per Tenant
                              </Typography>
@@ -2662,10 +2778,10 @@ function App() {
                           <TableCell>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                               {tenant.months.slice(0, 3).map((month, monthIndex) => (
-                                <Chip
+                    <Chip
                                   key={monthIndex}
                                   label={`${month.month} (${formatCurrency(month.amount)})`}
-                                  size="small"
+                      size="small"
                                   sx={{
                                     backgroundColor: `${colors.primary}15`,
                                     color: colors.primary,
@@ -2679,27 +2795,27 @@ function App() {
                               {tenant.months.length > 3 && (
                                 <Chip
                                   label={`+${tenant.months.length - 3} more`}
-                                  size="small"
+                        size="small"
                                   sx={{
                                     backgroundColor: `${colors.textSecondary}15`,
                                     color: colors.textSecondary,
                                     fontWeight: 600
                                   }}
                                 />
-                              )}
-                            </Box>
+                    )}
+                  </Box>
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
           </>
         )}
-      </Box>
-    );
+    </Box>
+  );
   };
 
   const MeterEntryTab = () => {
@@ -2756,6 +2872,49 @@ function App() {
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                            'July', 'August', 'September', 'October', 'November', 'December'];
         return `${monthNames[now.getMonth()]} ${now.getFullYear().toString().slice(-2)}`;
+    };
+
+    // Function to get previous month's meter reading for A-206
+    const getPreviousA206MeterReading = (currentMonth) => {
+        if (!meterData || meterData.length === 0) return null;
+        
+        const monthOrder = [
+            'August 24', 'September 24', 'October 24', 'November 24', 'December 24',
+            'January 25', 'February 25', 'March 25', 'April 25', 'May 25', 'June 25', 'July 25',
+            'August 25', 'September 25', 'October 25', 'November 25', 'December 25'
+        ];
+        
+        const currentIndex = monthOrder.indexOf(currentMonth);
+        if (currentIndex <= 0) return null;
+        
+        const previousMonth = monthOrder[currentIndex - 1];
+        return meterData.find(m => m.month === previousMonth);
+    };
+
+    // Function to calculate A-206 consumed values
+    const calculateA206ConsumedValues = (mainMeter, secondFloorMeter, month) => {
+        const previousReading = getPreviousA206MeterReading(month);
+        
+        if (!previousReading) {
+            return {
+                totalConsumed: 0,
+                secondFloorConsumed: 0,
+                finalSecondFloor: 0,
+                self: 0
+            };
+        }
+        
+        const totalConsumed = Math.max(0, parseFloat(mainMeter) - (previousReading.a206MainMeter || 0));
+        const secondFloorConsumed = Math.max(0, parseFloat(secondFloorMeter) - (previousReading.a206SecondFloorMeter || 0));
+        const finalSecondFloor = secondFloorConsumed + 200;
+        const self = Math.max(0, totalConsumed - finalSecondFloor);
+        
+        return {
+            totalConsumed,
+            secondFloorConsumed,
+            finalSecondFloor,
+            self
+        };
     };
 
     const getNextMonth = async () => {
@@ -2990,8 +3149,8 @@ function App() {
             setActionLoading(prev => ({ ...prev, 'a206-edit': true }));
             
             // Validate required fields
-            if (!a206EditForm.month || !a206EditForm.mainMeter || !a206EditForm.totalConsumed) {
-                setMessage('Please fill in all required fields (Month, Main Meter, Total Consumed)');
+            if (!a206EditForm.month || !a206EditForm.mainMeter) {
+                setMessage('Please fill in all required fields (Month, Main Meter)');
                 setOpenSnackbar(true);
                 return;
             }
@@ -3036,8 +3195,8 @@ function App() {
             setActionLoading(prev => ({ ...prev, 'a206-add': true }));
             
             // Validate required fields
-            if (!a206AddForm.month || !a206AddForm.mainMeter || !a206AddForm.totalConsumed) {
-                setMessage('Please fill in all required fields (Month, Main Meter, Total Consumed)');
+            if (!a206AddForm.month || !a206AddForm.mainMeter) {
+                setMessage('Please fill in all required fields (Month, Main Meter)');
                 setOpenSnackbar(true);
                 return;
             }
@@ -3309,18 +3468,33 @@ function App() {
                                 fullWidth
                                 label="Main Meter"
                                 type="number"
+                                step="0.01"
                                 value={a206EditForm.mainMeter}
-                                onChange={(e) => setA206EditForm(prev => ({ ...prev, mainMeter: e.target.value }))}
+                                onChange={(e) => {
+                                    const mainMeter = e.target.value;
+                                    const secondFloor = a206EditForm.secondFloor;
+                                    const month = a206EditForm.month;
+                                    const calculated = calculateA206ConsumedValues(mainMeter, secondFloor, month);
+                                    setA206EditForm(prev => ({ 
+                                        ...prev, 
+                                        mainMeter,
+                                        totalConsumed: calculated.totalConsumed,
+                                        secondFloorConsumed: calculated.secondFloorConsumed,
+                                        finalSecondFloor: calculated.finalSecondFloor,
+                                        self: calculated.self
+                                    }));
+                                }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Total Consumed"
+                                label="Total Consumed (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206EditForm.totalConsumed}
-                                onChange={(e) => setA206EditForm(prev => ({ ...prev, totalConsumed: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
@@ -3329,38 +3503,55 @@ function App() {
                                 fullWidth
                                 label="Second Floor Meter"
                                 type="number"
+                                step="0.01"
                                 value={a206EditForm.secondFloor}
-                                onChange={(e) => setA206EditForm(prev => ({ ...prev, secondFloor: e.target.value }))}
+                                onChange={(e) => {
+                                    const secondFloor = e.target.value;
+                                    const mainMeter = a206EditForm.mainMeter;
+                                    const month = a206EditForm.month;
+                                    const calculated = calculateA206ConsumedValues(mainMeter, secondFloor, month);
+                                    setA206EditForm(prev => ({ 
+                                        ...prev, 
+                                        secondFloor,
+                                        totalConsumed: calculated.totalConsumed,
+                                        secondFloorConsumed: calculated.secondFloorConsumed,
+                                        finalSecondFloor: calculated.finalSecondFloor,
+                                        self: calculated.self
+                                    }));
+                                }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Second Floor Consumed"
+                                label="Second Floor Consumed (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206EditForm.secondFloorConsumed}
-                                onChange={(e) => setA206EditForm(prev => ({ ...prev, secondFloorConsumed: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Self"
+                                label="Self (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206EditForm.self}
-                                onChange={(e) => setA206EditForm(prev => ({ ...prev, self: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Final Second Floor"
+                                label="Final Second Floor (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206EditForm.finalSecondFloor}
-                                onChange={(e) => setA206EditForm(prev => ({ ...prev, finalSecondFloor: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
@@ -3369,6 +3560,7 @@ function App() {
                                 fullWidth
                                 label="Gas Bill"
                                 type="number"
+                                step="0.01"
                                 value={a206EditForm.gasBill}
                                 onChange={(e) => setA206EditForm(prev => ({ ...prev, gasBill: e.target.value }))}
                                 variant="outlined"
@@ -3428,18 +3620,33 @@ function App() {
                                 fullWidth
                                 label="Main Meter"
                                 type="number"
+                                step="0.01"
                                 value={a206AddForm.mainMeter}
-                                onChange={(e) => setA206AddForm(prev => ({ ...prev, mainMeter: e.target.value }))}
+                                onChange={(e) => {
+                                    const mainMeter = e.target.value;
+                                    const secondFloor = a206AddForm.secondFloor;
+                                    const month = a206AddForm.month;
+                                    const calculated = calculateA206ConsumedValues(mainMeter, secondFloor, month);
+                                    setA206AddForm(prev => ({ 
+                                        ...prev, 
+                                        mainMeter,
+                                        totalConsumed: calculated.totalConsumed,
+                                        secondFloorConsumed: calculated.secondFloorConsumed,
+                                        finalSecondFloor: calculated.finalSecondFloor,
+                                        self: calculated.self
+                                    }));
+                                }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Total Consumed"
+                                label="Total Consumed (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206AddForm.totalConsumed}
-                                onChange={(e) => setA206AddForm(prev => ({ ...prev, totalConsumed: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
@@ -3448,38 +3655,55 @@ function App() {
                                 fullWidth
                                 label="Second Floor Meter"
                                 type="number"
+                                step="0.01"
                                 value={a206AddForm.secondFloor}
-                                onChange={(e) => setA206AddForm(prev => ({ ...prev, secondFloor: e.target.value }))}
+                                onChange={(e) => {
+                                    const secondFloor = e.target.value;
+                                    const mainMeter = a206AddForm.mainMeter;
+                                    const month = a206AddForm.month;
+                                    const calculated = calculateA206ConsumedValues(mainMeter, secondFloor, month);
+                                    setA206AddForm(prev => ({ 
+                                        ...prev, 
+                                        secondFloor,
+                                        totalConsumed: calculated.totalConsumed,
+                                        secondFloorConsumed: calculated.secondFloorConsumed,
+                                        finalSecondFloor: calculated.finalSecondFloor,
+                                        self: calculated.self
+                                    }));
+                                }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Second Floor Consumed"
+                                label="Second Floor Consumed (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206AddForm.secondFloorConsumed}
-                                onChange={(e) => setA206AddForm(prev => ({ ...prev, secondFloorConsumed: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Self"
+                                label="Self (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206AddForm.self}
-                                onChange={(e) => setA206AddForm(prev => ({ ...prev, self: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
-                                label="Final Second Floor"
+                                label="Final Second Floor (Auto-calculated)"
                                 type="number"
+                                step="0.01"
                                 value={a206AddForm.finalSecondFloor}
-                                onChange={(e) => setA206AddForm(prev => ({ ...prev, finalSecondFloor: e.target.value }))}
+                                InputProps={{ readOnly: true }}
                                 variant="outlined"
                             />
                         </Grid>
@@ -3488,6 +3712,7 @@ function App() {
                                 fullWidth
                                 label="Gas Bill"
                                 type="number"
+                                step="0.01"
                                 value={a206AddForm.gasBill}
                                 onChange={(e) => setA206AddForm(prev => ({ ...prev, gasBill: e.target.value }))}
                                 variant="outlined"
@@ -3554,6 +3779,28 @@ function App() {
                                     <TableBody>
                                         {meterData
                                             .filter(row => row.mainMeter != null || row.firstFloor != null || row.secondFloor != null || row.water != null)
+                                            .sort((a, b) => {
+                                                // Sort with current month on top, then by month order
+                                                const currentMonth = getCurrentMonth();
+                                                if (a.month === currentMonth) return -1;
+                                                if (b.month === currentMonth) return 1;
+                                                
+                                                // Define month order for sorting
+                                                const monthOrder = [
+                                                    'August 24', 'September 24', 'October 24', 'November 24', 'December 24',
+                                                    'January 25', 'February 25', 'March 25', 'April 25', 'May 25', 'June 25', 'July 25',
+                                                    'August 25', 'September 25', 'October 25', 'November 25', 'December 25'
+                                                ];
+                                                
+                                                const aIndex = monthOrder.indexOf(a.month);
+                                                const bIndex = monthOrder.indexOf(b.month);
+                                                
+                                                // If month not found in order, put it at the end
+                                                if (aIndex === -1) return 1;
+                                                if (bIndex === -1) return -1;
+                                                
+                                                return bIndex - aIndex; // Descending order (newest first)
+                                            })
                                             .map((row, index) => (
                                                 <TableRow key={index} hover>
                                                     <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 500 }}>{row.month}</TableCell>
@@ -3612,14 +3859,35 @@ function App() {
                                             <TableCell sx={{ minWidth: 120, whiteSpace: 'nowrap', fontWeight: 600 }}>2nd Floor Consumed</TableCell>
                                             <TableCell sx={{ minWidth: 100, whiteSpace: 'nowrap', fontWeight: 600 }}>Self</TableCell>
                                             <TableCell sx={{ minWidth: 120, whiteSpace: 'nowrap', fontWeight: 600 }}>Final 2nd Floor</TableCell>
-                                            <TableCell sx={{ minWidth: 140, whiteSpace: 'nowrap', fontWeight: 600 }}>Energy Units</TableCell>
                                             <TableCell sx={{ minWidth: 100, whiteSpace: 'nowrap', fontWeight: 600 }}>Gas Bill</TableCell>
                                             <TableCell sx={{ minWidth: 80, whiteSpace: 'nowrap', fontWeight: 600 }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {meterData
-                                            .filter(row => row.a206EnergyUnits != null || row.a206MainMeter != null)
+                                            .filter(row => row.a206MainMeter != null)
+                                            .sort((a, b) => {
+                                                // Sort with current month on top, then by month order
+                                                const currentMonth = getCurrentMonth();
+                                                if (a.month === currentMonth) return -1;
+                                                if (b.month === currentMonth) return 1;
+                                                
+                                                // Define month order for sorting
+                                                const monthOrder = [
+                                                    'August 24', 'September 24', 'October 24', 'November 24', 'December 24',
+                                                    'January 25', 'February 25', 'March 25', 'April 25', 'May 25', 'June 25', 'July 25',
+                                                    'August 25', 'September 25', 'October 25', 'November 25', 'December 25'
+                                                ];
+                                                
+                                                const aIndex = monthOrder.indexOf(a.month);
+                                                const bIndex = monthOrder.indexOf(b.month);
+                                                
+                                                // If month not found in order, put it at the end
+                                                if (aIndex === -1) return 1;
+                                                if (bIndex === -1) return -1;
+                                                
+                                                return bIndex - aIndex; // Descending order (newest first)
+                                            })
                                             .map((row, index) => (
                                                 <TableRow key={index} hover>
                                                     <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 500 }}>{row.month}</TableCell>
@@ -3629,7 +3897,6 @@ function App() {
                                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.a206SecondFloorConsumed || '-'}</TableCell>
                                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.a206Self || '-'}</TableCell>
                                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.a206FinalSecondFloor || '-'}</TableCell>
-                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.a206EnergyUnits || '-'}</TableCell>
                                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.a206GasBill || '-'}</TableCell>
                                                     <TableCell>
                                                         <IconButton
@@ -3654,6 +3921,67 @@ function App() {
     );
   }
 
+  const AuditLogTab = () => (
+    <Box>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
+        Audit Log
+      </Typography>
+      
+      <TableContainer component={Paper} sx={{ maxHeight: 600, overflow: 'auto' }}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>Timestamp</strong></TableCell>
+              <TableCell><strong>Activity</strong></TableCell>
+              <TableCell><strong>Month</strong></TableCell>
+              <TableCell><strong>Tenant</strong></TableCell>
+              <TableCell><strong>Details</strong></TableCell>
+              <TableCell><strong>Old Value</strong></TableCell>
+              <TableCell><strong>New Value</strong></TableCell>
+              <TableCell><strong>User</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {auditData.map((entry, index) => (
+              <TableRow key={index} hover>
+                <TableCell>
+                  {entry.Timestamp ? new Date(entry.Timestamp).toLocaleString() : 'N/A'}
+                </TableCell>
+                <TableCell>
+                  <Chip 
+                    label={entry.Activity || 'Unknown'} 
+                    color={
+                      entry.Activity && entry.Activity.includes('PAYMENT') ? 'success' :
+                      entry.Activity && entry.Activity.includes('METER') ? 'info' :
+                      entry.Activity && entry.Activity.includes('RENT') ? 'warning' :
+                      'default'
+                    }
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>{entry.Month || 'N/A'}</TableCell>
+                <TableCell>{entry.Tenant || 'N/A'}</TableCell>
+                <TableCell sx={{ maxWidth: 200, wordWrap: 'break-word' }}>
+                  {entry.Details || 'N/A'}
+                </TableCell>
+                <TableCell>{entry.OldValue || 'N/A'}</TableCell>
+                <TableCell>{entry.NewValue || 'N/A'}</TableCell>
+                <TableCell>{entry.User || 'N/A'}</TableCell>
+              </TableRow>
+            ))}
+            {auditData.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  No audit entries found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 0:
@@ -3665,7 +3993,11 @@ function App() {
       case 3:
         return <PaymentReportTab />;
       case 4:
+        return <PaymentSummaryCsvEditor />;
+      case 5:
         return <MeterEntryTab />;
+      case 6:
+        return <AuditLogTab />;
       default:
         return <DashboardTab />;
     }
@@ -3674,14 +4006,22 @@ function App() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Toolbar sx={{ minHeight: { xs: '56px', sm: '64px' } }}>
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              fontSize: { xs: '1rem', sm: '1.25rem' },
+              fontWeight: 600
+            }}
+          >
             Rent Management System
           </Typography>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="xl" sx={{ mt: 3 }}>
+      <Container maxWidth="xl" sx={{ mt: { xs: 1, sm: 3 }, px: { xs: 1, sm: 2 } }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Alert severity="info" sx={{ display: 'flex', alignItems: 'center' }}>
@@ -3691,13 +4031,29 @@ function App() {
           </Box>
         )}
         
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, overflowX: 'auto' }}>
+          <Tabs 
+            value={activeTab} 
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            sx={{
+              minHeight: '48px',
+              '& .MuiTab-root': {
+                minWidth: 'auto',
+                padding: { xs: '6px 8px', sm: '12px 16px' },
+                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+              }
+            }}
+          >
             <Tab icon={<DashboardIcon />} label="Dashboard" />
             <Tab icon={<PeopleIcon />} label="Individual Tenant" />
             <Tab icon={<ReceiptIcon />} label="Tenant Config" />
             <Tab icon={<BarChartIcon />} label="Payment Report" />
+            <Tab icon={<TableChartIcon />} label="Payment Summary" />
             <Tab icon={<SpeedIcon />} label="Meter Readings" />
+            <Tab icon={<AssessmentIcon />} label="Audit Log" />
           </Tabs>
         </Box>
 
