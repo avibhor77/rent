@@ -55,7 +55,8 @@ import {
   Add as AddIcon,
   Settings as SettingsIcon,
   BarChart as BarChartIcon,
-  TableChart as TableChartIcon
+  TableChart as TableChartIcon,
+  WhatsApp as WhatsAppIcon
 } from '@mui/icons-material';
 import PaymentSummaryCsvEditor from './components/PaymentSummaryCsvEditor';
 
@@ -277,6 +278,39 @@ function App() {
       setActionLoading(prev => ({ ...prev, [`mark-paid-${tenantKey}`]: false }));
     handleMenuClose();
     }
+  };
+
+  // WhatsApp reminder functionality
+  const generateWhatsAppReminder = (tenantKey, tenantName, totalRent, month = selectedMonth) => {
+    // Get tenant phone number from tenantConfigs
+    const tenantConfig = tenantConfigs.find(t => t.tenantKey === tenantKey);
+    if (!tenantConfig || !tenantConfig.phone) {
+      setMessage('Phone number not found for this tenant');
+      setOpenSnackbar(true);
+      return;
+    }
+
+    // Clean phone number (remove any non-digits)
+    const cleanPhone = tenantConfig.phone.replace(/\D/g, '');
+    
+    // Add country code if not present (assuming India +91)
+    const phoneWithCountryCode = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
+    
+    // Create personalized message
+    const firstName = tenantName.split(' ')[0];
+    const message = `Hi ${firstName}, how are you. Your rent with energy cost is ₹${totalRent.toLocaleString()}. Please make the payment promptly. -Anand.`;
+    
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/${phoneWithCountryCode}?text=${encodedMessage}`;
+    
+    // Open WhatsApp in new tab
+    window.open(whatsappUrl, '_blank');
+    
+    // Log the action
+    console.log(`WhatsApp reminder sent to ${tenantName} (${tenantConfig.phone}) for ₹${totalRent.toLocaleString()}`);
   };
 
   const handleMenuOpen = (event, row) => {
@@ -746,17 +780,29 @@ function App() {
                         <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#d32f2f' }}>
                           ₹{due.amount.toLocaleString()}
                         </Typography>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          size="small"
-                          onClick={() => markAsPaid(due.tenant)}
-                          disabled={actionLoading[`mark-paid-${due.tenant}`]}
-                          startIcon={actionLoading[`mark-paid-${due.tenant}`] ? <CircularProgress size={16} /> : null}
-                          sx={{ mt: 0.5 }}
-                        >
-                          {actionLoading[`mark-paid-${due.tenant}`] ? 'Processing...' : 'Mark Paid'}
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            size="small"
+                            onClick={() => markAsPaid(due.tenant)}
+                            disabled={actionLoading[`mark-paid-${due.tenant}`]}
+                            startIcon={actionLoading[`mark-paid-${due.tenant}`] ? <CircularProgress size={16} /> : null}
+                            sx={{ fontSize: '0.75rem' }}
+                          >
+                            {actionLoading[`mark-paid-${due.tenant}`] ? 'Processing...' : 'Mark Paid'}
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            onClick={() => generateWhatsAppReminder(due.tenant, due.name, due.amount)}
+                            startIcon={<WhatsAppIcon />}
+                            sx={{ fontSize: '0.75rem' }}
+                          >
+                            Send Reminder
+                          </Button>
+                        </Box>
                       </Box>
                     </Box>
                   ))
@@ -1398,15 +1444,26 @@ function App() {
                     )}
                     
                     {selectedTenantData.status !== 'Paid' && !isFutureMonth(selectedMonth) && (
-                      <Button
-                        variant="contained"
-                        size="large"
-                        onClick={() => markAsPaid(selectedTenantKey)}
-                        disabled={actionLoading[`mark-paid-${selectedTenantKey}`]}
-                        startIcon={actionLoading[`mark-paid-${selectedTenantKey}`] ? <CircularProgress size={20} /> : <CheckIcon />}
-                      >
-                        {actionLoading[`mark-paid-${selectedTenantKey}`] ? 'Processing...' : 'Mark Paid'}
-                      </Button>
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <Button
+                          variant="contained"
+                          size="large"
+                          onClick={() => markAsPaid(selectedTenantKey)}
+                          disabled={actionLoading[`mark-paid-${selectedTenantKey}`]}
+                          startIcon={actionLoading[`mark-paid-${selectedTenantKey}`] ? <CircularProgress size={20} /> : <CheckIcon />}
+                        >
+                          {actionLoading[`mark-paid-${selectedTenantKey}`] ? 'Processing...' : 'Mark Paid'}
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="large"
+                          onClick={() => generateWhatsAppReminder(selectedTenantKey, selectedTenantData.name, selectedTenantData.totalRent)}
+                          startIcon={<WhatsAppIcon />}
+                          color="primary"
+                        >
+                          Send WhatsApp Reminder
+                        </Button>
+                      </Box>
                     )}
 
                     <Button
@@ -2094,16 +2151,28 @@ function App() {
                       )}
                       
                       {tenant.status !== 'Paid' && !isFutureMonth(selectedMonth) && (
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => markAsPaid(tenantKey)}
-                          disabled={actionLoading[`mark-paid-${tenantKey}`]}
-                          startIcon={actionLoading[`mark-paid-${tenantKey}`] ? <CircularProgress size={14} /> : <CheckIcon />}
-                          sx={{ fontSize: '0.75rem', px: 1 }}
-                        >
-                          {actionLoading[`mark-paid-${tenantKey}`] ? 'Processing...' : 'Mark Paid'}
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column' }}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => markAsPaid(tenantKey)}
+                            disabled={actionLoading[`mark-paid-${tenantKey}`]}
+                            startIcon={actionLoading[`mark-paid-${tenantKey}`] ? <CircularProgress size={14} /> : <CheckIcon />}
+                            sx={{ fontSize: '0.7rem', px: 1, py: 0.5 }}
+                          >
+                            {actionLoading[`mark-paid-${tenantKey}`] ? 'Processing...' : 'Mark Paid'}
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => generateWhatsAppReminder(tenantKey, tenant.name, tenant.totalRent)}
+                            startIcon={<WhatsAppIcon />}
+                            sx={{ fontSize: '0.7rem', px: 1, py: 0.5 }}
+                            color="primary"
+                          >
+                            Remind
+                          </Button>
+                        </Box>
                       )}
                     </Box>
                   </CardContent>
@@ -4075,14 +4144,30 @@ function App() {
         }}
       >
         {selectedRow && selectedRow.status !== 'Paid' && (
-          <MenuItem onClick={() => {
-            if (selectedRow) markAsPaid(selectedRow.tenant);
-          }}>
-            <ListItemIcon>
-              <CheckCircleIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Mark as Paid</ListItemText>
-          </MenuItem>
+          <>
+            <MenuItem onClick={() => {
+              if (selectedRow) markAsPaid(selectedRow.tenant);
+            }}>
+              <ListItemIcon>
+                <CheckCircleIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Mark as Paid</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => {
+              if (selectedRow) {
+                const tenantConfig = tenantConfigs.find(t => t.tenantKey === selectedRow.tenant);
+                if (tenantConfig) {
+                  generateWhatsAppReminder(selectedRow.tenant, tenantConfig.name, selectedRow.totalRent);
+                }
+                handleMenuClose();
+              }
+            }}>
+              <ListItemIcon>
+                <WhatsAppIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Send WhatsApp Reminder</ListItemText>
+            </MenuItem>
+          </>
         )}
         <MenuItem onClick={() => {
           if (selectedRow) {
