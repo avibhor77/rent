@@ -20,6 +20,102 @@ function logAuditActivity(activity, month, tenant, details, oldValue = '', newVa
     }
 }
 
+// Function to detect and log CSV file changes
+async function detectAndLogCsvChanges() {
+    try {
+        console.log('Checking for CSV file changes...');
+        
+        // Read current CSV file
+        const csvData = [];
+        if (fs.existsSync(RENT_CSV_PATH)) {
+            await new Promise((resolve, reject) => {
+                fs.createReadStream(RENT_CSV_PATH)
+                    .pipe(csv())
+                    .on('data', (row) => {
+                        csvData.push(row);
+                    })
+                    .on('end', resolve)
+                    .on('error', reject);
+            });
+        }
+        
+        // Compare with in-memory data
+        const changes = [];
+        
+        csvData.forEach(csvRow => {
+            const month = csvRow.Month;
+            const tenant = csvRow.Tenant;
+            
+            // Find corresponding data in memory
+            const monthData = rentData.find(m => m.month === month);
+            if (monthData && monthData[tenant]) {
+                const memoryData = monthData[tenant];
+                
+                // Check for changes in key fields
+                const fieldsToCheck = ['BaseRent', 'Maintenance', 'EnergyCharges', 'GasBill', 'TotalRent', 'Status'];
+                
+                fieldsToCheck.forEach(field => {
+                    const csvValue = parseFloat(csvRow[field]) || csvRow[field];
+                    const memoryValue = memoryData[field.toLowerCase()] || memoryData[field];
+                    
+                    if (csvValue !== memoryValue) {
+                        changes.push({
+                            month,
+                            tenant,
+                            field,
+                            oldValue: memoryValue,
+                            newValue: csvValue
+                        });
+                        
+                        // Update memory data to match CSV
+                        if (field === 'BaseRent') memoryData.baseRent = csvValue;
+                        else if (field === 'Maintenance') memoryData.maintenance = csvValue;
+                        else if (field === 'EnergyCharges') memoryData.energyCharges = csvValue;
+                        else if (field === 'GasBill') memoryData.gasBill = csvValue;
+                        else if (field === 'TotalRent') memoryData.totalRent = csvValue;
+                        else if (field === 'Status') memoryData.status = csvValue;
+                    }
+                });
+            }
+        });
+        
+        // Log changes to audit log (only significant changes)
+        if (changes.length > 0) {
+            console.log(`Found ${changes.length} CSV changes to log`);
+            
+            // Only log changes for important fields and significant value changes
+            changes.forEach(change => {
+                const isSignificantChange = 
+                    change.field === 'GasBill' || 
+                    change.field === 'Status' || 
+                    (change.field === 'TotalRent' && Math.abs(change.newValue - change.oldValue) > 100) ||
+                    (change.field === 'BaseRent' && Math.abs(change.newValue - change.oldValue) > 100);
+                
+                if (isSignificantChange) {
+                    const details = `${change.field}: ${change.oldValue} → ${change.newValue}`;
+                    logAuditActivity(
+                        'CSV_FILE_UPDATED',
+                        change.month,
+                        change.tenant,
+                        details,
+                        change.oldValue,
+                        change.newValue,
+                        'Manual CSV Edit'
+                    );
+                }
+            });
+            
+            // Save updated data back to CSV to ensure consistency
+            await saveRentDataToCSV();
+        } else {
+            console.log('No CSV changes detected');
+        }
+        
+    } catch (error) {
+        console.error('Error detecting CSV changes:', error);
+    }
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -88,6 +184,7 @@ const rentCsvWriter = createCsvWriter({
         { id: 'BaseRent', title: 'BaseRent' },
         { id: 'Maintenance', title: 'Maintenance' },
         { id: 'EnergyCharges', title: 'EnergyCharges' },
+        { id: 'GasBill', title: 'GasBill' },
         { id: 'TotalRent', title: 'TotalRent' },
         { id: 'Status', title: 'Status' },
         { id: 'Comments', title: 'Comments' }
@@ -1112,6 +1209,10 @@ async function startServer() {
         console.log(`Attempting to start server on port ${PORT}...`);
         const server = app.listen(PORT, () => {
             console.log(`Server successfully started on port ${PORT}`);
+            
+            // CSV change detection completely disabled to prevent audit log flooding
+            // The system was creating too many entries and flooding the audit log
+            // If manual CSV changes need to be tracked, they should be done through the UI
         });
         
         // Handle server errors
@@ -1669,6 +1770,17 @@ app.get('/api/month-exists/:month', async (req, res) => {
         res.json({ month, exists });
     } catch (error) {
         console.error('Error checking month existence:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API endpoint to manually check for CSV changes
+app.post('/api/check-csv-changes', async (req, res) => {
+    try {
+        await detectAndLogCsvChanges();
+        res.json({ success: true, message: 'CSV change detection completed' });
+    } catch (error) {
+        console.error('Error checking CSV changes:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });

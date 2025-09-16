@@ -1,0 +1,46 @@
+Timestamp,Activity,Month,Tenant,Details,OldValue,NewValue,User
+2025-09-07T03:01:19.263Z,TENANT_CONFIG_UPDATED,All Months,A-88 G,"baseRent: 26000 → 27000, maintenance: 500 → 600","{""name"":""Vaneet Bhalla","phone"":""9811812336","address"":""A-88 Ground Floor Sector 52 Noida"
+2025-09-07T03:01:26.923Z,PAYMENT_MARKED_PAID,September 25,A-88 G,Payment received for ₹29108,Not Paid,Paid,System
+2025-09-07T03:11:59.844Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 1st,Auto-calculated from meter readings,₹4048,₹4050,System
+2025-09-07T03:11:59.844Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3688,₹3690,System
+2025-09-07T03:11:59.844Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹0,₹5600,System
+2025-09-07T03:11:59.845Z,A206_METER_READING_ENTERED,September 25,A-206 2nd,"Main: 109000, Total Consumed: 650, 2nd Floor: 27500, Self: 50, Energy Units: 700",,,System
+2025-09-07T03:16:45.761Z,RENT_ADJUSTED,September 25,A-88 G,"Base: ₹26000, Maintenance: ₹500, Energy: ₹2608, Gas: ₹",₹29108,₹29108,System
+2025-09-07T03:16:45.761Z,STATUS_CHANGED,September 25,A-88 G,Status changed,Paid,Not Paid,System
+2025-09-07T10:56:45.923Z,PAYMENT_MARKED_PAID,August 25,A-88 1st,Payment received for ₹29860,Not Paid,Paid,System
+2025-09-07T11:51:34.639Z,PAYMENT_MARKED_PAID,August 25,A-206 2nd,Payment received for ₹28000,Not Paid,Paid,System
+2025-09-07T11:51:39.195Z,PAYMENT_MARKED_PAID,August 25,A-88 2nd,Payment received for ₹23170,Not Paid,Paid,System
+2025-09-07T12:35:15.680Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 1st,Auto-calculated from meter readings,₹4050,₹4050,System
+2025-09-07T12:35:15.681Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3690,₹3690,System
+2025-09-07T12:35:15.681Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 G,Auto-calculated from meter readings,₹2610,₹2610,System
+2025-09-07T12:35:15.681Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹5600,₹5600,System
+2025-09-07T12:35:15.682Z,METER_READING_ENTERED,September 25,All Tenants,"Main: 243814, 1st Floor: 15754, 2nd Floor: 55982, Water: 8862",,,System
+2025-09-07T12:36:30.635Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 1st,Auto-calculated from meter readings,₹4050,₹4050,System
+2025-09-07T12:36:30.635Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3690,₹3690,System
+2025-09-07T12:36:30.635Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 G,Auto-calculated from meter readings,₹2610,₹2620,System
+2025-09-07T12:36:30.635Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹5600,₹5600,System
+2025-09-07T12:36:30.636Z,METER_READING_ENTERED,September 25,All Tenants,"Main: 243815, 1st Floor: 15754, 2nd Floor: 55982, Water: 8862",,,System
+2025-09-07T13:01:36.057Z,PAYMENT_MARKED_PAID,September 25,A-88 1st,Payment received for ₹29550,Not Paid,Paid,System
+2025-09-11T01:50:31.121Z,RENT_ADJUSTED,September 25,A-206 2nd,"Base: ₹23000, Maintenance: ₹, Energy: ₹5600, Gas: ₹712",₹22600,₹22600,System
+2025-09-11T01:53:17.777Z,RENT_ADJUSTED,September 25,A-206 2nd,"Base: ₹23000, Maintenance: ₹, Energy: ₹5600, Gas: ₹712",₹22600,₹28600,System
+2025-09-11T02:03:42.172Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3690,₹3690,System
+2025-09-11T02:03:42.173Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 G,Auto-calculated from meter readings,₹2620,₹2620,System
+2025-09-11T02:03:42.173Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹5600,₹5600,System
+2025-09-11T02:03:42.174Z,A206_METER_READING_ENTERED,September 25,A-206 2nd,"Main: 115428, Total Consumed: 650, 2nd Floor: 27500, Self: 50, Energy Units: 700",,,System
+2025-09-11T02:23:38.123Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3690,₹3690,System
+2025-09-11T02:23:38.124Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 G,Auto-calculated from meter readings,₹2620,₹2620,System
+2025-09-11T02:23:38.124Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹5600,₹19430,System
+2025-09-11T02:23:38.126Z,A206_METER_READING_ENTERED,September 25,A-206 2nd,"Main: 115427, Total Consumed: 1314, 2nd Floor: 27800, Self: 1114, Energy Units: 2428",,,System
+2025-09-11T02:23:51.631Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3690,₹3690,System
+2025-09-11T02:23:51.631Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 G,Auto-calculated from meter readings,₹2620,₹2620,System
+2025-09-11T02:23:51.631Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹19430,₹14490,System
+2025-09-11T02:23:51.633Z,A206_METER_READING_ENTERED,September 25,A-206 2nd,"Main: 115427, Total Consumed: 1314, 2nd Floor: 29999, Self: 497, Energy Units: 1811",,,System
+2025-09-11T02:45:33.012Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3690,₹3690,System
+2025-09-11T02:45:33.013Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 G,Auto-calculated from meter readings,₹2620,₹2620,System
+2025-09-11T02:45:33.013Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹14490,₹2020,System
+2025-09-11T02:45:33.015Z,A206_METER_READING_ENTERED,September 25,A-206 2nd,"Main: 115427, Total Consumed: 1314, 2nd Floor: 29999, Self: 497",,,System
+2025-09-11T02:49:27.944Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 2nd,Auto-calculated from meter readings,₹3690,₹3690,System
+2025-09-11T02:49:27.944Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-88 G,Auto-calculated from meter readings,₹2620,₹2620,System
+2025-09-11T02:49:27.944Z,ENERGY_CHARGE_AUTO_UPDATED,September 25,A-206 2nd,Auto-calculated from meter readings,₹2020,₹6540,System
+2025-09-11T02:49:27.945Z,A206_METER_READING_ENTERED,September 25,A-206 2nd,"Main: 115427, Total Consumed: 1314, 2nd Floor: 29999, Self: 497",,,System
+2025-09-11T02:49:44.292Z,RENT_ADJUSTED,September 25,A-206 2nd,"Base: ₹23000, Maintenance: ₹200, Energy: ₹6540, Gas: ₹1200",₹30740,₹30740,System
