@@ -188,6 +188,55 @@ async function loadRentDataFromCSV() {
     }
 }
 
+// Function to save rent data to CSV
+async function saveRentDataToCSV() {
+    try {
+        const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+        
+        // Prepare data for CSV writing
+        const csvData = [];
+        rentData.forEach(record => {
+            Object.keys(record).forEach(tenantKey => {
+                if (tenantKey !== 'month' && record[tenantKey]) {
+                    const tenantData = record[tenantKey];
+                    csvData.push({
+                        Month: record.month,
+                        Tenant: tenantKey,
+                        BaseRent: tenantData.baseRent || 0,
+                        Maintenance: tenantData.maintenance || 0,
+                        EnergyCharges: tenantData.energyCharges || 0,
+                        TotalRent: tenantData.totalRent || 0,
+                        GasBill: tenantData.gasBill || 0,
+                        Status: tenantData.status || 'Not Paid'
+                    });
+                }
+            });
+        });
+        
+        // Create CSV writer
+        const csvWriter = createCsvWriter({
+            path: RENT_CSV_PATH,
+            header: [
+                { id: 'Month', title: 'Month' },
+                { id: 'Tenant', title: 'Tenant' },
+                { id: 'BaseRent', title: 'BaseRent' },
+                { id: 'Maintenance', title: 'Maintenance' },
+                { id: 'EnergyCharges', title: 'EnergyCharges' },
+                { id: 'TotalRent', title: 'TotalRent' },
+                { id: 'GasBill', title: 'GasBill' },
+                { id: 'Status', title: 'Status' }
+            ]
+        });
+        
+        // Write to CSV
+        await csvWriter.writeRecords(csvData);
+        console.log('Rent data saved to CSV successfully');
+    } catch (error) {
+        console.error('Error saving rent data to CSV:', error);
+        throw error;
+    }
+}
+
 // Function to load meter data from CSV
 async function loadMeterDataFromCSV() {
     try {
@@ -2128,6 +2177,116 @@ app.get('/api/payment-summary', async (req, res) => {
     } catch (error) {
         console.error('Error fetching payment summary:', error);
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Update payment data endpoint
+app.put('/api/payment-summary/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+        
+        // Parse the ID to get month and tenant
+        const [month, tenant] = id.split('_');
+        if (!month || !tenant) {
+            return res.status(400).json({ success: false, message: 'Invalid ID format' });
+        }
+        
+        // Find the rent data record for this month
+        const rentRecord = rentData.find(record => record.month === month);
+        if (!rentRecord) {
+            return res.status(404).json({ success: false, message: 'Month not found' });
+        }
+        
+        // Update the tenant data
+        if (!rentRecord[tenant]) {
+            rentRecord[tenant] = {};
+        }
+        
+        rentRecord[tenant] = {
+            ...rentRecord[tenant],
+            baseRent: updateData.baseRent || 0,
+            maintenance: updateData.maintenance || 0,
+            energyCharges: updateData.energyCharges || 0,
+            totalRent: updateData.totalRent || 0,
+            gasBill: updateData.gasBill || 0,
+            status: updateData.status || 'Not Paid'
+        };
+        
+        // Save to CSV file
+        await saveRentDataToCSV();
+        
+        res.json({ success: true, message: 'Payment data updated successfully' });
+    } catch (error) {
+        console.error('Error updating payment data:', error);
+        res.status(500).json({ success: false, message: 'Failed to update payment data' });
+    }
+});
+
+// Create new payment data endpoint
+app.post('/api/payment-summary', async (req, res) => {
+    try {
+        const newData = req.body;
+        const { month, tenant } = newData;
+        
+        if (!month || !tenant) {
+            return res.status(400).json({ success: false, message: 'Month and tenant are required' });
+        }
+        
+        // Find or create the rent data record for this month
+        let rentRecord = rentData.find(record => record.month === month);
+        if (!rentRecord) {
+            rentRecord = { month: month };
+            rentData.push(rentRecord);
+        }
+        
+        // Add the tenant data
+        rentRecord[tenant] = {
+            baseRent: newData.baseRent || 0,
+            maintenance: newData.maintenance || 0,
+            energyCharges: newData.energyCharges || 0,
+            totalRent: newData.totalRent || 0,
+            gasBill: newData.gasBill || 0,
+            status: newData.status || 'Not Paid'
+        };
+        
+        // Save to CSV file
+        await saveRentDataToCSV();
+        
+        res.json({ success: true, message: 'Payment data created successfully' });
+    } catch (error) {
+        console.error('Error creating payment data:', error);
+        res.status(500).json({ success: false, message: 'Failed to create payment data' });
+    }
+});
+
+// Delete payment data endpoint
+app.delete('/api/payment-summary/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Parse the ID to get month and tenant
+        const [month, tenant] = id.split('_');
+        if (!month || !tenant) {
+            return res.status(400).json({ success: false, message: 'Invalid ID format' });
+        }
+        
+        // Find the rent data record for this month
+        const rentRecord = rentData.find(record => record.month === month);
+        if (!rentRecord || !rentRecord[tenant]) {
+            return res.status(404).json({ success: false, message: 'Payment data not found' });
+        }
+        
+        // Remove the tenant data
+        delete rentRecord[tenant];
+        
+        // Save to CSV file
+        await saveRentDataToCSV();
+        
+        res.json({ success: true, message: 'Payment data deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting payment data:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete payment data' });
     }
 });
 

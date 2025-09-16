@@ -87,6 +87,19 @@ const PaymentSummaryCsvEditor = () => {
     try {
       setLoading(true);
       
+      // Send update to backend
+      const response = await fetch(`/api/payment-summary/${editingRow}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editForm),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update payment data');
+      }
+      
       // Update the local state
       setCsvData(prevData => 
         prevData.map(row => 
@@ -94,17 +107,10 @@ const PaymentSummaryCsvEditor = () => {
         )
       );
       
-      // Here you would typically send the update to your API
-      // For now, we'll just show success
       setMessage('Row updated successfully!');
       setSuccess(true);
       setEditingRow(null);
       setEditForm({});
-      
-      // Reload data after a short delay to show the loader
-      setTimeout(() => {
-        loadData();
-      }, 1000);
       
     } catch (err) {
       setError('Failed to save changes');
@@ -137,6 +143,19 @@ const PaymentSummaryCsvEditor = () => {
     try {
       setLoading(true);
       
+      // Send new row to backend
+      const response = await fetch('/api/payment-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newRow),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create payment data');
+      }
+      
       const newId = `${newRow.month}_${newRow.tenant}`;
       const newRowWithId = { ...newRow, id: newId };
       
@@ -145,11 +164,6 @@ const PaymentSummaryCsvEditor = () => {
       setSuccess(true);
       setShowAddDialog(false);
       setNewRow({});
-      
-      // Reload data after a short delay
-      setTimeout(() => {
-        loadData();
-      }, 1000);
       
     } catch (err) {
       setError('Failed to add new row');
@@ -165,14 +179,18 @@ const PaymentSummaryCsvEditor = () => {
       try {
         setLoading(true);
         
+        // Send delete request to backend
+        const response = await fetch(`/api/payment-summary/${rowId}`, {
+          method: 'DELETE',
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete payment data');
+        }
+        
         setCsvData(prevData => prevData.filter(row => row.id !== rowId));
         setMessage('Row deleted successfully!');
         setSuccess(true);
-        
-        // Reload data after a short delay
-        setTimeout(() => {
-          loadData();
-        }, 1000);
         
       } catch (err) {
         setError('Failed to delete row');

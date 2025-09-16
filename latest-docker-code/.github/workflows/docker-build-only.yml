@@ -1,0 +1,39 @@
+name: Build Docker Image Only
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.simple
+        push: false
+        tags: rent-app:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Save Docker image
+      run: |
+        docker save rent-app:latest -o rent-app.tar.gz
+        echo "Docker image saved as rent-app.tar.gz"
+        
+    - name: Upload Docker image as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: rent-app-docker-image
+        path: rent-app.tar.gz
+        retention-days: 30 

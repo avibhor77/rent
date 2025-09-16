@@ -1,0 +1,9 @@
+tenantKey,name,phone,address,floor,baseRent,maintenance,misc,rentStartMonth,paysMaintenance,notes
+"A-88 G","Vaneet Bhalla","9811812336","A-88 Ground Floor Sector 52 Noida","Ground","26000","500","","January 2024","true","Reliable tenant pays on time"
+"A-88 1st","VishnuPratap Pandey","918377051059","A-88 First Floor Sector 15 Noida","1st","25000","500","","March 2024","true","Sometimes delays payment"
+"A-88 2nd","Sumit Swarnkar","9340609004","A-88 Second Floor Sector 15 Noida","2nd","20000","500","","February 2024","true","Good tenant"
+"A-206 2nd","Ajit Singh","9999311108","A-206 Second Floor Sector 15 Noida","2nd","23000","60","500","April 2025","true","No maintenance included - Base rent: 17000(Aug24) → 20000(Sep24) → 23000(Apr25) - Gas bill every other month"
+"A-81 G","Avinash Baisoya","9999722190","A-81 Ground Floor Sector 15 Noida","Ground","20000","","","December 2023","false","Long-term tenant"
+"A-81 1st","Sumit Raghav","93112055890","A-81 First Floor Sector 15 Noida","1st","29000","","","November 2023","false","Premium tenant"
+"Eldeco","Saqib Mustafa","9792552989","Eldeco Aangan Sector 15 Noida","N/A","34000","","","October 2023","false","Commercial property"
+"Gomti","Sameer Agarwal","9792552989","Gomti Nagar Lucknow","N/A","80000","","","September 2023","false","High-value property"

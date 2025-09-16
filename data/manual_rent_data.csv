@@ -1,224 +1,225 @@
-Month,Tenant,Name,Phone,Floor,BaseRent,Maintenance,EnergyCharges,TotalRent,Status,Comments,GasBill
-August 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,4104,30604,Paid,,0
-August 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,5096,30596,Paid,,0
-August 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,7344,27844,Paid,,0
-August 24,A-206 2nd,Ajit Singh,9999311108,2nd,17000,0,1360,18360,Paid,,0
-August 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-August 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,,0
-August 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-August 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-September 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2224,28724,Paid,,0
-September 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4920,30420,Paid,,0
-September 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,6768,27268,Paid,,0
-September 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3850,24110,Paid,,0
-September 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-September 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-September 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-September 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-October 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1416,27916,Paid,,0
-October 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2936,28436,Paid,,0
-October 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3720,24220,Paid,,0
-October 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3040,23300,Paid,,0
-October 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-October 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-October 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-October 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-November 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1048,27548,Paid,,0
-November 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2432,27932,Paid,,0
-November 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4752,25252,Paid,,0
-November 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2110,23215,Paid,,0
-November 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-November 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-November 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-November 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-December 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1152,27652,Paid,,0
-December 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1208,26708,Paid,,0
-December 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2352,22852,Paid,,0
-December 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1900,22160,Paid,,0
-December 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-December 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-December 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-December 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-January 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1072,27572,Paid,,0
-January 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1912,27412,Paid,,0
-January 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1728,22228,Paid,,0
-January 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2265,23020,Paid,,0
-January 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-January 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-January 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-January 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-February 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1008,27508,Paid,,0
-February 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2168,27668,Paid,,0
-February 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1240,21740,Paid,,0
-February 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1850,22110,Paid,,0
-February 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-February 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-February 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-February 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-March 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,904,27404,Paid,,0
-March 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1488,26988,Paid,,0
-March 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1480,21980,Paid,,0
-March 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1845,22683,Paid,,0
-March 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-March 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-March 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-March 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-April 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1192,27692,Paid,,0
-April 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1480,26980,Paid,,0
-April 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2216,22716,Paid,,0
-April 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,1880,25140,Paid,,0
-April 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-April 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-April 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-April 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-May 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1600,28100,Paid,,0
-May 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3472,28972,Paid,,0
-May 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4688,25188,Paid,,0
-May 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4917,28411,Paid,,0
-May 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-May 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-May 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-May 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-June 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2536,29036,Paid,,0
-June 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3632,29132,Paid,,0
-June 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4472,24972,Paid,,0
-June 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5439,28499,Paid,,0
-June 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-June 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-June 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-June 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-July 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3848,30348,Paid,,0
-July 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4496,29996,Paid,,0
-July 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3584,24084,Paid,,0
-July 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4990,28050,Paid,,0
-July 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-July 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-July 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-July 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-August 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3520,30020,Paid,,0
-August 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4360,29860,Paid,,0
-August 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2670,23170,Paid,,0
-August 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5000,28000,Paid,,0
-August 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-August 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,,0
-August 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-August 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-September 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2620,29120,Not Paid,,0
-September 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4050,29550,Paid,,0
-September 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3690,24190,Not Paid,,0
-September 25,A-81 G,Avinash Baisoya,9999722190,Ground,26000,500,0,26500,Not Paid,,0
-September 25,A-81 1st,Sumit Raghav,93112055890,1st,25000,500,0,25500,Not Paid,,0
-September 25,Eldeco,Saqib Mustafa,9792552989,N/A,20000,0,0,20000,Not Paid,,0
-September 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Not Paid,,0
-August 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,4104,30604,Paid,,0
-August 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,5096,30596,Paid,,0
-August 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,7344,27844,Paid,,0
-August 24,A-206 2nd,Ajit Singh,9999311108,2nd,17000,0,1360,18360,Paid,,0
-August 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-August 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,,0
-August 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-August 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-September 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2224,28724,Paid,,0
-September 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4920,30420,Paid,,0
-September 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,6768,27268,Paid,,0
-September 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3850,24110,Paid,,0
-September 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-September 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-September 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-September 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-October 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1416,27916,Paid,,0
-October 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2936,28436,Paid,,0
-October 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3720,24220,Paid,,0
-October 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3040,23300,Paid,,0
-October 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-October 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-October 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-October 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-November 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1048,27548,Paid,,0
-November 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2432,27932,Paid,,0
-November 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4752,25252,Paid,,0
-November 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2110,23215,Paid,,0
-November 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-November 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-November 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-November 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-December 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1152,27652,Paid,,0
-December 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1208,26708,Paid,,0
-December 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2352,22852,Paid,,0
-December 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1900,22160,Paid,,0
-December 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-December 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-December 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-December 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-January 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1072,27572,Paid,,0
-January 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1912,27412,Paid,,0
-January 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1728,22228,Paid,,0
-January 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2265,23020,Paid,,0
-January 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-January 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-January 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-January 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-February 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1008,27508,Paid,,0
-February 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2168,27668,Paid,,0
-February 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1240,21740,Paid,,0
-February 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1850,22110,Paid,,0
-February 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-February 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-February 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-February 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-March 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,904,27404,Paid,,0
-March 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1488,26988,Paid,,0
-March 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1480,21980,Paid,,0
-March 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1845,22683,Paid,,0
-March 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-March 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-March 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-March 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-April 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1192,27692,Paid,,0
-April 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1480,26980,Paid,,0
-April 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2216,22716,Paid,,0
-April 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,1880,25140,Paid,,0
-April 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-April 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-April 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-April 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-May 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1600,28100,Paid,,0
-May 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3472,28972,Paid,,0
-May 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4688,25188,Paid,,0
-May 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4917,28411,Paid,,0
-May 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-May 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-May 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-May 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-June 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2536,29036,Paid,,0
-June 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3632,29132,Paid,,0
-June 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4472,24972,Paid,,0
-June 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5439,28499,Paid,,0
-June 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-June 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-June 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-June 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-July 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3848,30348,Paid,,0
-July 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4496,29996,Paid,,0
-July 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3584,24084,Paid,,0
-July 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4990,28050,Paid,,0
-July 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-July 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,,0
-July 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-July 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-August 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3520,30020,Paid,,0
-August 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4360,29860,Paid,,0
-August 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2670,23170,Paid,,0
-August 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5000,28000,Paid,,0
-August 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,,0
-August 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,,0
-August 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,,0
-August 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,,0
-September 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2620,29120,Not Paid,,0
-September 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4050,29550,Paid,,0
-September 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3690,24190,Not Paid,,0
-September 25,A-81 G,Avinash Baisoya,9999722190,Ground,26000,500,0,26500,Not Paid,,0
-September 25,A-81 1st,Sumit Raghav,93112055890,1st,25000,500,0,25500,Not Paid,,0
-September 25,Eldeco,Saqib Mustafa,9792552989,N/A,20000,0,0,20000,Not Paid,,0
-September 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Not Paid,,0
-September 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,60,5484,29256,Paid,,712
+Month,Tenant,Name,Phone,Floor,BaseRent,Maintenance,EnergyCharges,TotalRent,Status,Comments
+August 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,4104,30604,Paid,
+August 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,5096,30596,Paid,
+August 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,7344,27844,Paid,
+August 24,A-206 2nd,Ajit Singh,9999311108,2nd,17000,0,1360,18360,Paid,
+August 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+August 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,
+August 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+August 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+September 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2224,28724,Paid,
+September 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4920,30420,Paid,
+September 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,6768,27268,Paid,
+September 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3850,24110,Paid,
+September 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+September 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+September 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+September 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+October 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1416,27916,Paid,
+October 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2936,28436,Paid,
+October 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3720,24220,Paid,
+October 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3040,23300,Paid,
+October 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+October 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+October 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+October 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+November 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1048,27548,Paid,
+November 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2432,27932,Paid,
+November 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4752,25252,Paid,
+November 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2110,23215,Paid,
+November 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+November 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+November 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+November 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+December 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1152,27652,Paid,
+December 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1208,26708,Paid,
+December 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2352,22852,Paid,
+December 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1900,22160,Paid,
+December 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+December 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+December 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+December 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+January 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1072,27572,Paid,
+January 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1912,27412,Paid,
+January 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1728,22228,Paid,
+January 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2265,23020,Paid,
+January 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+January 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+January 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+January 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+February 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1008,27508,Paid,
+February 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2168,27668,Paid,
+February 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1240,21740,Paid,
+February 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1850,22110,Paid,
+February 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+February 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+February 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+February 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+March 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,904,27404,Paid,
+March 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1488,26988,Paid,
+March 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1480,21980,Paid,
+March 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1845,22683,Paid,
+March 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+March 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+March 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+March 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+April 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1192,27692,Paid,
+April 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1480,26980,Paid,
+April 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2216,22716,Paid,
+April 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,1880,25140,Paid,
+April 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+April 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+April 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+April 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+May 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1600,28100,Paid,
+May 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3472,28972,Paid,
+May 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4688,25188,Paid,
+May 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4917,28411,Paid,
+May 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+May 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+May 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+May 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+June 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2536,29036,Paid,
+June 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3632,29132,Paid,
+June 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4472,24972,Paid,
+June 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5439,28499,Paid,
+June 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+June 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+June 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+June 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+July 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3848,30348,Paid,
+July 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4496,29996,Paid,
+July 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3584,24084,Paid,
+July 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4990,28050,Paid,
+July 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+July 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+July 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+July 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+August 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3520,30020,Paid,
+August 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4360,29860,Paid,
+August 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2670,23170,Paid,
+August 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5000,28000,Paid,
+August 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+August 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,
+August 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+August 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+September 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2620,29120,Not Paid,
+September 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4050,29550,Paid,
+September 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3690,24190,Not Paid,
+September 25,A-81 G,Avinash Baisoya,9999722190,Ground,26000,500,0,26500,Not Paid,
+September 25,A-81 1st,Sumit Raghav,93112055890,1st,25000,500,0,25500,Not Paid,
+September 25,Eldeco,Saqib Mustafa,9792552989,N/A,20000,0,0,20000,Not Paid,
+September 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Not Paid,
+September 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,60,5484,29256,Paid,
+August 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,4104,30604,Paid,
+August 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,5096,30596,Paid,
+August 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,7344,27844,Paid,
+August 24,A-206 2nd,Ajit Singh,9999311108,2nd,17000,0,1360,18360,Paid,
+August 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+August 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,
+August 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+August 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+September 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2224,28724,Paid,
+September 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4920,30420,Paid,
+September 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,6768,27268,Paid,
+September 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3850,24110,Paid,
+September 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+September 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+September 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+September 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+October 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1416,27916,Paid,
+October 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2936,28436,Paid,
+October 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3720,24220,Paid,
+October 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,3040,23300,Paid,
+October 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+October 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+October 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+October 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+November 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1048,27548,Paid,
+November 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2432,27932,Paid,
+November 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4752,25252,Paid,
+November 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2110,23215,Paid,
+November 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+November 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+November 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+November 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+December 24,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1152,27652,Paid,
+December 24,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1208,26708,Paid,
+December 24,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2352,22852,Paid,
+December 24,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1900,22160,Paid,
+December 24,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+December 24,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+December 24,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+December 24,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+January 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1072,27572,Paid,
+January 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1912,27412,Paid,
+January 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1728,22228,Paid,
+January 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,2265,23020,Paid,
+January 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+January 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+January 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+January 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+February 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1008,27508,Paid,
+February 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,2168,27668,Paid,
+February 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1240,21740,Paid,
+February 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1850,22110,Paid,
+February 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+February 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+February 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+February 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+March 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,904,27404,Paid,
+March 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1488,26988,Paid,
+March 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,1480,21980,Paid,
+March 25,A-206 2nd,Ajit Singh,9999311108,2nd,20000,0,1845,22683,Paid,
+March 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+March 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+March 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+March 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+April 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1192,27692,Paid,
+April 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,1480,26980,Paid,
+April 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2216,22716,Paid,
+April 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,1880,25140,Paid,
+April 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+April 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+April 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+April 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+May 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,1600,28100,Paid,
+May 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3472,28972,Paid,
+May 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4688,25188,Paid,
+May 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4917,28411,Paid,
+May 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+May 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+May 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+May 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+June 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2536,29036,Paid,
+June 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,3632,29132,Paid,
+June 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,4472,24972,Paid,
+June 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5439,28499,Paid,
+June 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+June 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+June 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+June 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+July 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3848,30348,Paid,
+July 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4496,29996,Paid,
+July 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3584,24084,Paid,
+July 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,4990,28050,Paid,
+July 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+July 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Paid,
+July 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+July 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+August 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,3520,30020,Paid,
+August 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4360,29860,Paid,
+August 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,2670,23170,Paid,
+August 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,0,5000,28000,Paid,
+August 25,A-81 G,Avinash Baisoya,9999722190,Ground,20000,0,0,20000,Paid,
+August 25,A-81 1st,Sumit Raghav,93112055890,1st,29000,0,0,29000,Not Paid,
+August 25,Eldeco,Saqib Mustafa,9792552989,N/A,34000,0,0,34000,Paid,
+August 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Paid,
+September 25,A-88 G,Vaneet Bhalla,9811812336,Ground,26000,500,2620,29120,Not Paid,
+September 25,A-88 1st,VishnuPratap Pandey,918377051059,1st,25000,500,4050,29550,Paid,
+September 25,A-88 2nd,Sumit Swarnkar,9340609004,2nd,20000,500,3690,24190,Not Paid,
+September 25,A-81 G,Avinash Baisoya,9999722190,Ground,26000,500,0,26500,Not Paid,
+September 25,A-81 1st,Sumit Raghav,93112055890,1st,25000,500,0,25500,Not Paid,
+September 25,Eldeco,Saqib Mustafa,9792552989,N/A,20000,0,0,20000,Not Paid,
+September 25,Gomti,Sameer Agarwal,9792552989,N/A,80000,0,0,80000,Not Paid,
+September 25,A-206 2nd,Ajit Singh,9999311108,2nd,23000,60,5484,29256,Paid,
