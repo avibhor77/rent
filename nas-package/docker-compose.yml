@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  rent-management-app:
+    image: rent-management-app:latest
+    container_name: rent-management-app
+    restart: unless-stopped
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - PORT=9999
+      - DATA_PATH=/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9999/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rent-app-network
+    labels:
+      - "com.docker.compose.project=rent-management"
+      - "com.docker.compose.service=app"
+
+networks:
+  rent-app-network:
+    driver: bridge
